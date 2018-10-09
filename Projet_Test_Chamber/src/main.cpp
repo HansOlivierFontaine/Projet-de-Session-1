@@ -20,6 +20,7 @@ Variables globales et defines
 double speedGauche = 0.625;
 double speedDroite = 0.6;
 int delayEntreMouvement = 200;
+int nbCycle =0 ;
 //#define PI 3.1415926
 // -> defines...
 // L'ensemble des fonctions y ont acces
@@ -78,20 +79,28 @@ void PIDBasic()
 
     delay(10);
    /* 
-    Serial.print("Moteur Droit ="); 
-    Serial.println(speedDroite);
     Serial.print("Moteur Gauche =");
     Serial.println(speedGauche);
+    Serial.print("Moteur Droit ="); 
+    Serial.println(speedDroite);
     */
     rapportErreur = (comptePulseDroit - comptePulseGauche);
+
+    float KI = (nbCycle * 5000 ) - comptePulseGauche ; 
+    Serial.print("nbCylce  =");
+    Serial.println(nbCycle, 5);
+    Serial.print("AVANT KI  =");
+    Serial.println(KI, 5);
+    KI = KI * 0.00002; 
 
     speedGauche += (rapportErreur * 0.0001);
 
     MOTOR_SetSpeed(LEFT, speedGauche);
-     
-     /*
-    Serial.print("rapport Erreur =");
-    Serial.println(rapportErreur, 5);
+
+    Serial.print("KI  =");
+    Serial.println(KI, 5);
+    Serial.print("Moteur Gauche =");
+    Serial.println(speedGauche);
     /**/
 
     delay(5);
@@ -99,10 +108,10 @@ void PIDBasic()
 
 void Avancer_Cm(int distance)
 {
-    long Counter = 0;
+    long Compteur = 0;
 
-    float circumference = 3.1415926 * 7.5;
-    long PulseParCm = 32000 / circumference;
+    float circonference = 3.1415926 * 7.5;
+    long PulseParCm = 32000 / circonference;
     long ComptePulse = (PulseParCm * (distance));
     ComptePulse = ComptePulse / 10;
 
@@ -112,10 +121,11 @@ void Avancer_Cm(int distance)
     speedDroite = 0.6;
     Acceleration();
     int temps = 0;
-    while (Counter < ComptePulse)
+    while (Compteur < ComptePulse)
     {
         if(temps >= 500)
         {
+            nbCycle ++;
             PIDBasic();
             temps = 0;
         }
@@ -123,55 +133,12 @@ void Avancer_Cm(int distance)
             temps +=5;
 
         delay(5);    
-        Counter = ENCODER_Read(RIGHT);
+        Compteur = ENCODER_Read(RIGHT);
        //PIDBasic();
     }
     Decceleration();
 
     delay(200);
-}
-
-void Tourne_Deg(int degree, int direction)
-{
-    float CenterCircumference = PI * 200;
-    float Wheelcircumference = PI * 86;
-
-    int rotationDistance = (CenterCircumference * degree) / 360;
-    long gearParCm = 32000 / Wheelcircumference;
-    long GearCount = (gearParCm * (rotationDistance));
-    GearCount = GearCount / 10;
-    int ValDroit, ValGauche = 0;
-
-    ENCODER_Reset(LEFT);
-    ENCODER_Reset(RIGHT);
-    if (direction == RIGHT)
-    {
-        MOTOR_SetSpeed(RIGHT, -0.4);
-        MOTOR_SetSpeed(LEFT, 0.4);
-        while ((ValGauche <= GearCount) && (ValDroit <= GearCount))
-        {
-            ValGauche = ENCODER_Read(LEFT);
-            ValDroit = ENCODER_Read(RIGHT);
-            delay(5);
-        }
-        MOTOR_SetSpeed(LEFT, 0);
-        MOTOR_SetSpeed(RIGHT, 0);
-        /**/
-    }
-    else if (direction == LEFT)
-    {
-        MOTOR_SetSpeed(RIGHT, 0.4);
-        MOTOR_SetSpeed(LEFT, -0.4);
-        while ((ValGauche <= GearCount) && (ValDroit <= GearCount))
-        {
-            ValGauche = ENCODER_Read(LEFT);
-            ValDroit = ENCODER_Read(RIGHT);
-            delay(5);
-        }
-        MOTOR_SetSpeed(LEFT, 0);
-        MOTOR_SetSpeed(RIGHT, 0);
-        /**/
-    }
 }
 
 void Tourne45(int direction)
@@ -261,8 +228,9 @@ Fonctions de boucle infini (loop())
 
 void loop()
 {
-       int comptePulse;
+       int comptePulse = 0;
   // SOFT_TIMER_Update(); // A decommenter pour utiliser des compteurs logiciels
+   
     delay(2000);
     
     Avancer_Cm(200);
@@ -314,7 +282,7 @@ void loop()
         MOTOR_SetSpeed(RIGHT, 0.6);
         MOTOR_SetSpeed(LEFT, 0);
         comptePulse = 0;
-        while(comptePulse <= (3200*0.9) )
+        while(comptePulse <= (3200*0.85) )
         {
             comptePulse = ENCODER_Read(RIGHT);
             delay(10);
@@ -328,7 +296,23 @@ void loop()
     delay(delayEntreMouvement);
     Tourne45(RIGHT);
     delay(delayEntreMouvement);
-    Avancer_Cm(80);
+    Avancer_Cm(20); 
+
+     ENCODER_Reset(LEFT);
+     ENCODER_Reset(RIGHT);
+        MOTOR_SetSpeed(RIGHT, 0);
+        MOTOR_SetSpeed(LEFT, 0.6);
+        comptePulse = 0;
+        while(comptePulse <= (3200*0.1) )
+        {
+            comptePulse = ENCODER_Read(LEFT);
+            delay(10);
+        }
+        MOTOR_SetSpeed(LEFT, 0);
+        MOTOR_SetSpeed(RIGHT, 0); 
+
+    delay(delayEntreMouvement);
+    Avancer_Cm(65);
    
    /* 
    delay(delayEntreMouvement);
