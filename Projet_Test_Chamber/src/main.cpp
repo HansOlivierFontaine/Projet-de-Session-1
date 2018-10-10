@@ -39,13 +39,13 @@ void Acceleration()
     MOTOR_SetSpeed(RIGHT, speedDroite * 0.1);
     delay(50);
     MOTOR_SetSpeed(LEFT, speedGauche * 0.3);
-    MOTOR_SetSpeed(RIGHT, speedDroite * 0.2);
+    MOTOR_SetSpeed(RIGHT, speedDroite * 0.26);
     delay(50);
     MOTOR_SetSpeed(LEFT, speedGauche * 0.5);
-    MOTOR_SetSpeed(RIGHT, speedDroite * 0.4);
+    MOTOR_SetSpeed(RIGHT, speedDroite * 0.46);
     delay(50);
     MOTOR_SetSpeed(LEFT, speedGauche * 0.7);
-    MOTOR_SetSpeed(RIGHT, speedDroite * 0.6);
+    MOTOR_SetSpeed(RIGHT, speedDroite * 0.66);
     delay(50);
     MOTOR_SetSpeed(LEFT, speedGauche * 1);
     MOTOR_SetSpeed(RIGHT, speedDroite * 1);
@@ -57,15 +57,15 @@ void Decceleration()
     delay(50);
     MOTOR_SetSpeed(LEFT, speedGauche * 0.6);
     MOTOR_SetSpeed(RIGHT, speedDroite * 0.6);
-    delay(1000);
-    /*delay(50);
-    MOTOR_SetSpeed(LEFT, speedGauche * 0.5);
-    MOTOR_SetSpeed(RIGHT, speedDroite * 0.5);
+
+    delay(50);
+    MOTOR_SetSpeed(LEFT, speedGauche * 0.4);
+    MOTOR_SetSpeed(RIGHT, speedDroite * 0.4);
     delay(60);
     
-    MOTOR_SetSpeed(LEFT, speedGauche * 0.3);
-    MOTOR_SetSpeed(RIGHT, speedDroite * 0.3);
-    delay(60);*/
+    MOTOR_SetSpeed(LEFT, speedGauche * 0.1);
+    MOTOR_SetSpeed(RIGHT, speedDroite * 0.1);
+    delay(60);
     MOTOR_SetSpeed(LEFT, 0);
     MOTOR_SetSpeed(RIGHT, 0);
 }
@@ -185,11 +185,52 @@ void Avancer_Cm(int distance)
         Compteur = ENCODER_Read(RIGHT);
        //PIDBasic();
     }
-   
+      Decceleration();
+
+}
+void Avancer200()
+{
+    long Compteur = 0;
+
+    float circonference = 3.1415926 * 7.5;
+    long PulseParCm = 32000 / circonference;
+    long ComptePulse = (PulseParCm * (200));
+    ComptePulse = ComptePulse / 10;
+
+    ENCODER_Reset(RIGHT);
+    ENCODER_Reset(LEFT);
+    speedGauche = 0.625;
+    speedDroite = 0.6;
+    Acceleration();
+    nbCycle = 0;
+    int temps = 0;
+    int prochainCycle= 3200;
+
+    while (Compteur < ComptePulse)
+    {
+       
+       if(Compteur >= prochainCycle)
+        {
+            prochainCycle = Compteur + 3200;
+            PIDParMoteur();
+            temps = 0;
+        }
+        
+        
+        delay(5);           
+
+        Compteur = ENCODER_Read(RIGHT);
+       //PIDBasic();
+    }
+    
+    MOTOR_SetSpeed(LEFT, 0.4);
+    MOTOR_SetSpeed(RIGHT, 0.4);
     delay(50);
-    MOTOR_SetSpeed(LEFT, speedGauche * 0.6);
-    MOTOR_SetSpeed(RIGHT, speedDroite * 0.6);
-    delay(1000);
+    MOTOR_SetSpeed(LEFT, 0.2);
+    MOTOR_SetSpeed(RIGHT, 0.2);
+    delay(50);
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
 
 }
 
@@ -236,7 +277,7 @@ void Tourne90(int direction)
         MOTOR_SetSpeed(RIGHT, 0);
         MOTOR_SetSpeed(LEFT, 0.6);
         comptePulse = 0;
-        while (comptePulse <= (3200 * 1.2))
+        while (comptePulse <= (3200 * 1.18))
         {
             comptePulse = ENCODER_Read(LEFT);
             delay(10);
@@ -249,7 +290,7 @@ void Tourne90(int direction)
         MOTOR_SetSpeed(RIGHT, 0.6);
         MOTOR_SetSpeed(LEFT, 0);
         comptePulse = 0;
-        while (comptePulse <= (3200 * 1.2))
+        while (comptePulse <= (3200 * 1.18))
         {
             comptePulse = ENCODER_Read(RIGHT);
             delay(10);
@@ -284,13 +325,9 @@ void loop()
   // SOFT_TIMER_Update(); // A decommenter pour utiliser des compteurs logiciels
    
     delay(1500);
-    /*
-    Avancer_Cm(200);
-    delay(200);
-    Avancer_Cm(200);
-    while(1);
-    /**/
-    Avancer_Cm(100);
+
+   
+    Avancer200();
     delay(500);
     //DEBUT DU U
     
@@ -309,11 +346,11 @@ void loop()
 
     Tourne90(RIGHT);
     delay(delayEntreMouvement);
-    Avancer_Cm(35);
+    Avancer_Cm(20);
     //FIN DU U 
     delay(delayEntreMouvement);
 
-   /*
+   
     ENCODER_Reset(LEFT);
     ENCODER_Reset(RIGHT);
         MOTOR_SetSpeed(RIGHT, 0.6);
@@ -336,7 +373,7 @@ void loop()
 
      ENCODER_Reset(LEFT);
      ENCODER_Reset(RIGHT);
-        MOTOR_SetSpeed(RIGHT, 0.6);
+        MOTOR_SetSpeed(RIGHT, 0.7);
         MOTOR_SetSpeed(LEFT, 0);
         comptePulse = 0;
         while(comptePulse <= (3200*0.85) )
@@ -349,7 +386,7 @@ void loop()
     //Tourne90(LEFT);
 
     delay(delayEntreMouvement);
-    Avancer_Cm(43);
+    Avancer_Cm(50);
     delay(delayEntreMouvement);
     Tourne45(RIGHT);
     delay(delayEntreMouvement);
