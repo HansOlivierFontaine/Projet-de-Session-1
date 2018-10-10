@@ -12,8 +12,8 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "c:/Users/Tommy/Desktop/Projet_Parcour_21/build/megaatmega2560/firmware.elf",
-            "toolchainBinDir": "C:/Users/Tommy/AppData/Roaming/SPB_Data/.platformio/packages/toolchain-atmelavr/bin",
+            "executable": "c:/Users/William/Documents/GitHub/Projet-de-Session-1/Projet_Parcour_21/build/megaatmega2560/firmware.elf",
+            "toolchainBinDir": "C:/Users/William/.platformio/packages/toolchain-atmelavr/bin",
             "preLaunchTask": {
                 "type": "PlatformIO",
                 "task": "Pre-Debug"
@@ -24,8 +24,8 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "c:/Users/Tommy/Desktop/Projet_Parcour_21/build/megaatmega2560/firmware.elf",
-            "toolchainBinDir": "C:/Users/Tommy/AppData/Roaming/SPB_Data/.platformio/packages/toolchain-atmelavr/bin",
+            "executable": "c:/Users/William/Documents/GitHub/Projet-de-Session-1/Projet_Parcour_21/build/megaatmega2560/firmware.elf",
+            "toolchainBinDir": "C:/Users/William/.platformio/packages/toolchain-atmelavr/bin",
             "internalConsoleOptions": "openOnSessionStart"
         }
     ]
