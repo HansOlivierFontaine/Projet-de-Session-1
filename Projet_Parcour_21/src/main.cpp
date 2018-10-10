@@ -349,21 +349,21 @@ void loop()
     delay(500);
     //DEBUT DU U
     
-    Tourne_Pulse(LEFT , 1.18);
+    Tourne_Pulse(LEFT , 1.17);
     
     delay(delayEntreMouvement);
     Avancer_Cm(30);
     delay(delayEntreMouvement);
 
     //LIGNE BASSE U
-    Tourne_Pulse(RIGHT , 1.18);
+    Tourne_Pulse(RIGHT , 1.17);
 
     delay(delayEntreMouvement);
     Avancer_Cm(20);
     delay(delayEntreMouvement);
 
 
-    Tourne_Pulse(RIGHT , 1.18);
+    Tourne_Pulse(RIGHT , 1.14);
     delay(delayEntreMouvement);
     Avancer_Cm(15);
     //FIN DU U 
@@ -372,18 +372,23 @@ void loop()
     Tourne_Pulse(LEFT , 0.8);
 
     delay(delayEntreMouvement);
-    Avancer_Cm(58);
-    delay(delayEntreMouvement);
+    Avancer_Cm(63);
+    delay(delayEntreMouvement); //RENDU HAUT DU CROCHE
 
-    Tourne_Pulse(LEFT , 0.8);
+    Tourne_Pulse(LEFT , 0.86);
 
     delay(delayEntreMouvement);
-    Avancer_Cm(60);
+    Avancer_Cm(62);
     delay(delayEntreMouvement);
     
-    Tourne_Pulse(RIGHT , 0.45);
+    Tourne_Pulse(RIGHT , 0.45); // TOURNE POUR DERNIERE ''LIGNE''
 
     delay(delayEntreMouvement);
-    Avancer_Cm(85); 
+    Avancer_Cm(25); 
+    delay(delayEntreMouvement);
+    Tourne_Pulse(RIGHT , 0.1);
+    Avancer_Cm(60); 
+    delay(delayEntreMouvement);
+    
   
 }
