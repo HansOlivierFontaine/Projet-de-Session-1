@@ -1,15 +1,13 @@
 /*
 *CONTIENT :librairy du capteur
-*MANQUE : transformation des couleurs, lecture couleurs, code Sifflet , séquence de départ
-*FONCTIONNEL : S.O
-*NON-FONCTIONNEL : tout
-*NOTES: Refaire les déplacements (intégrer la direction avant/arriere)
+*MANQUE : code Sifflet , séquence de départ
+*FONCTIONNEL : Deplacement avant/arrière sur une longueur spécifié
+*NON-FONCTIONNEL : 
+*NOTES: A tester : couleurs & réaction/réajustement en cas de sortie de zone coloré
 */
 
 #include <LibRobus.h>
 #include "capteur.h"
-
-#define COULEUREQUIPE 2
 
 #define comptePulseTheo 3200 
 #define AVANT true
@@ -27,9 +25,11 @@ double speedGauche = 0.6;
 double speedDroite = 0.6;
 int delayEntreMouvement = 200;
 bool deplacement = ARRIERE;
-int captCoul = COULEUREQUIPE;
+int captCoul = ZONECOUL;
 int nbCycle =1 ;
 
+//variables de print debug
+bool debugMoteur = false;
 
 
 void Acceleration()
@@ -128,15 +128,19 @@ void Avancer_Cm(int distance , int direction)
       speedGauche = speedGauche * -1;
       ComptePulse = ComptePulse * -1 ;
     }
-        Serial.print("C / G / D : " );
-        Serial.print(ComptePulse);
-        Serial.print(" " );
-        Serial.print(speedGauche);
-        Serial.print(" " );
-        Serial.println(speedDroite);
+        if(debugMoteur)
+        {
+            Serial.print("C / G / D : " );
+            Serial.print(ComptePulse);
+            Serial.print(" " );
+            Serial.print(speedGauche);
+            Serial.print(" " );
+            Serial.println(speedDroite);
+        }
 
        Acceleration(); 
-    while (abs(Compteur) < abs(ComptePulse) && captCoul == COULEUREQUIPE)
+       //Valeur absolues pour compter même à reculons
+    while (abs(Compteur) < abs(ComptePulse) && captCoul == ZONECOUL)
     {
         //getCouleur();
         distance += 3;
@@ -203,12 +207,13 @@ void getCouleur()
     printADJD_CUSTOM();
     delay(1000);
 
-    if(colorData[0] < NOIR && colorData[3] < NOIR &&colorData[2] < NOIR )
+    //change la variable indiquant la zone sous le robot
+    if(colorData[0] < NOIR && colorData[3] < NOIR &&colorData[2] < NOIR ) //200
     {
         Serial.println("Zone du but");
         captCoul = ZONEBUT;
     }
-    else if(colorData[0] < BLANC && colorData[3] < BLANC &&colorData[2] < BLANC )
+    else if(colorData[0] < BLANC && colorData[3] < BLANC &&colorData[2] < BLANC ) //850
     {
         Serial.println("Zone de jeu");
         captCoul = ZONEJEU;
@@ -226,17 +231,17 @@ void loop()
     int distance =0;
     delay(200);
 
-    if(captCoul == COULEUREQUIPE) //si dans sa zone
+    if(captCoul == ZONECOUL) //si dans sa zone
     {
         Avancer_Cm(60 , deplacement);
         distance =0;
         deplacement = !deplacement; 
-      //  Serial.println(deplacement);
     }
+
+
     else if(captCoul == ZONEBUT) //noir
     {
-        deplacement = !deplacement;
-        Avancer_Cm(10 , deplacement);
+        Avancer_Cm(10 , !deplacement); //inverse son déplacement pour 10 cm
         delay(250);
         if(deplacement == AVANT)
             Tourne_Pulse(RIGHT,0.2);
@@ -245,14 +250,12 @@ void loop()
     }
     else // blanc / ZONEJEU
     {
-      deplacement = !deplacement;
-      Avancer_Cm(10 , deplacement);
+      Avancer_Cm(10 , !deplacement); //inverse son déplacement pour 10 cm
       delay(250);
       if(deplacement == AVANT)
       Tourne_Pulse(LEFT,0.2);
       else
       Tourne_Pulse(RIGHT,0.2);
 
-      deplacement = !deplacement ; //continue son déplacement originel
     } 
 }
