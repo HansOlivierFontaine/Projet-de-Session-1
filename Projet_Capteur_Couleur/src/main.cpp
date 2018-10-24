@@ -27,6 +27,7 @@ int delayEntreMouvement = 200;
 bool deplacement = ARRIERE;
 int captCoul = ZONECOUL;
 int nbCycle =1 ;
+int btnDepartPin = 0;
 
 //variables de print debug
 bool debugMoteur = false;
@@ -53,7 +54,6 @@ void Acceleration()
     MOTOR_SetSpeed(RIGHT, speedDroite * 1);
     delay(50);
 }
-
 void Decceleration()
 {
     MOTOR_SetSpeed(LEFT,speedGauche * 0.6);
@@ -65,7 +65,6 @@ void Decceleration()
     MOTOR_SetSpeed(LEFT, 0);
     MOTOR_SetSpeed(RIGHT, 0);
 }
-
 void PIDParMoteur()
 { 
     int comptePulseG = 0;
@@ -193,11 +192,20 @@ void Tourne_Pulse(int direction, float NbPulse)
 
 void setup()
 {
-  BoardInit();
-  pinMode(ledPin, OUTPUT);  // Set the sensor's LED as output
-  digitalWrite(ledPin, HIGH);  // Initially turn LED light source on
+    int btnDepart = false;
+    BoardInit();
+    pinMode(ledPin, OUTPUT);  // Set the sensor's LED as output
+    digitalWrite(ledPin, HIGH);  // Initially turn LED light source on
 
-  //setupCapteur();
+  //setupCapteur( calibration(bool) );
+    /*
+    //si on utilise un bouton externe et non la switch d'alim.
+    while(btnDepart != true)
+       btnDepart = digitalRead(btnDepartPin);
+    delay(5000);
+    */
+    //go nuts
+
   /**/
 }
 
@@ -238,7 +246,6 @@ void loop()
         deplacement = !deplacement; 
     }
 
-
     else if(captCoul == ZONEBUT) //noir
     {
         Avancer_Cm(10 , !deplacement); //inverse son déplacement pour 10 cm
@@ -256,6 +263,5 @@ void loop()
       Tourne_Pulse(LEFT,0.2);
       else
       Tourne_Pulse(RIGHT,0.2);
-
     } 
 }

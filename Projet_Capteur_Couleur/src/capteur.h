@@ -58,21 +58,6 @@ unsigned char colorCap[4] = {9, 9, 2, 5};  // values must be between 0 and 15
 unsigned int colorInt[4] = {2048, 2048, 2048, 2048};  // max value for these is 4095
 unsigned int colorData[4];  // This is where we store the RGB and C data values
 signed char colorOffset[4];  // Stores RGB and C offset values
-/*
-void setupCapteur();
-void writeInt(int address, int gain);
-unsigned char readRegister(unsigned char address);
-int readRegisterInt(unsigned char address);
-void performMeasurement();
-void printADJD_CUSTOM();
-void printADJD_S311Values();
-void initADJD_S311();
-int calibrateClear();
-int calibrateColor();
-void calibrateCapacitors();
-void getRGBC();
-void getOffset();
-*/
 
 /* I2C functions...*/
 // Write a byte of data to a specific ADJD-S311 address
@@ -396,26 +381,29 @@ void getOffset()
     colorOffset[i] = (signed char) readRegister(OFFSET_RED+i);
   digitalWrite(ledPin, HIGH);
 }
-void setupCapteur()
+void setupCapteur(bool doCalibration)
 {
   Serial.begin(9600);
   
   Wire.begin();
   delay(1);  // Wait for ADJD reset sequence
   initADJD_S311();  // Initialize the ADJD-S311, sets up cap and int registers
- 
-  Serial.println("\nHold up a white object in front of the sensor, then press any key to calibrate...\n");
+  if(doCalibration)
+  {
+    Serial.println("\nHold up a white object in front of the sensor, then press any key to calibrate...\n");
   
-  while(!Serial.available())
-    ;  // Wait till a key is pressed
-  Serial.flush();
+    while(!Serial.available())
+      ;  // Wait till a key is pressed
+    Serial.flush();
+    
+    Serial.println("\nCalibrating...this may take a moment\n");
+    calibrateColor();  // This calibrates R, G, and B int registers
+    calibrateClear();  // This calibrates the C int registers
+    calibrateCapacitors();  // This calibrates the RGB, and C cap registers
+    getRGBC();  // After calibrating, we can get the first RGB and C data readings
+    printADJD_S311Values();  // Formats and prints all important ADJD-S311 registers
+  }
   
-  Serial.println("\nCalibrating...this may take a moment\n");
-  calibrateColor();  // This calibrates R, G, and B int registers
-  calibrateClear();  // This calibrates the C int registers
-  calibrateCapacitors();  // This calibrates the RGB, and C cap registers
-  getRGBC();  // After calibrating, we can get the first RGB and C data readings
-  printADJD_S311Values();  // Formats and prints all important ADJD-S311 registers
 }
 
 #endif //LibRobus
