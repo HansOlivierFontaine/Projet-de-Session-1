@@ -28,6 +28,7 @@ bool deplacement = ARRIERE;
 int captCoul = ZONECOUL;
 int nbCycle =1 ;
 int btnDepartPin = 0;
+int SiffletPin = 2;
 
 //variables de print debug
 bool debugMoteur = false;
@@ -65,6 +66,48 @@ void Decceleration()
     MOTOR_SetSpeed(LEFT, 0);
     MOTOR_SetSpeed(RIGHT, 0);
 }
+
+void getSifflet()
+{
+     int Sifflet =0; 
+    Sifflet = digitalRead(SiffletPin);
+
+    if(Sifflet == HIGH)
+    {
+        Decceleration();
+        delay(10000);
+        Acceleration();
+    }
+}
+
+void getCouleur()
+{
+   
+    
+    getRGBC();//les couleurs sont RGB (0-1023) dans colorData[3]
+    printADJD_CUSTOM();
+    delay(1000);
+
+    //change la variable indiquant la zone sous le robot
+    if(colorData[0] < NOIR && colorData[3] < NOIR &&colorData[2] < NOIR ) //200
+    {
+        Serial.println("Zone du but");
+        captCoul = ZONEBUT;
+    }
+    else if(colorData[0] < BLANC && colorData[3] < BLANC &&colorData[2] < BLANC ) //850
+    {
+        Serial.println("Zone de jeu");
+        captCoul = ZONEJEU;
+    }
+    else
+    { 
+        Serial.println("Zone de défense");
+        captCoul = ZONECOUL;
+    }
+    
+}
+
+
 void PIDParMoteur()
 { 
     int comptePulseG = 0;
@@ -140,12 +183,13 @@ void Avancer_Cm(int distance , int direction)
        Acceleration(); 
        //Valeur absolues pour compter même à reculons
     while (abs(Compteur) < abs(ComptePulse) && captCoul == ZONECOUL)
-    {
+    {   
         //getCouleur();
         distance += 3;
 
        if(Compteur >= prochainCycle)
         {
+            getSifflet();
             prochainCycle = Compteur + 3200;
             //PIDParMoteur();
             temps = 0;
@@ -195,6 +239,7 @@ void setup()
     int btnDepart = false;
     BoardInit();
     pinMode(ledPin, OUTPUT);  // Set the sensor's LED as output
+    pinMode(SiffletPin ,INPUT );
     digitalWrite(ledPin, HIGH);  // Initially turn LED light source on
 
   //setupCapteur( calibration(bool) );
@@ -209,29 +254,6 @@ void setup()
   /**/
 }
 
-void getCouleur()
-{
-    getRGBC();//les couleurs sont RGB (0-1023) dans colorData[3]
-    printADJD_CUSTOM();
-    delay(1000);
-
-    //change la variable indiquant la zone sous le robot
-    if(colorData[0] < NOIR && colorData[3] < NOIR &&colorData[2] < NOIR ) //200
-    {
-        Serial.println("Zone du but");
-        captCoul = ZONEBUT;
-    }
-    else if(colorData[0] < BLANC && colorData[3] < BLANC &&colorData[2] < BLANC ) //850
-    {
-        Serial.println("Zone de jeu");
-        captCoul = ZONEJEU;
-    }
-    else
-    { 
-        Serial.println("Zone de défense");
-        captCoul = ZONECOUL;
-    }
-}
 
 // ||
 void loop()
