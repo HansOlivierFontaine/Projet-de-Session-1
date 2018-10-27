@@ -13,7 +13,7 @@ Inclure les librairies de functions que vous voulez utiliser
 
 #include <LibRobus.h> // Essentielle pour utiliser RobUS
 #include <signal.h>
-
+#include "capteur.h"
 /* ****************************************************************************
 Variables globales et defines
 **************************************************************************** */
@@ -168,6 +168,11 @@ void mouvementAttaquant()
         MOTOR_SetSpeed(RIGHT, -0.5);
         MOTOR_SetSpeed(LEFT, -0.5);
         Tourne45;
+    }else if(couleur == noir)
+    {
+        MOTOR_SetSpeed(RIGHT, -1.0);
+        MOTOR_SetSpeed(LEFT, -1.0);
+        delay(2000);
     }else
     {
         MOTOR_SetSpeed(RIGHT, 0.5);
@@ -303,6 +308,15 @@ Fonctions de boucle infini (loop())
 
 void loop()
 {
+    Bouton bouton;
+    while(!bouton)
+    {
+        delay(10);
+    }
+    dealy(5000);
+    signal(1, signalHandlerDistance);
+    mouvementAttaquant;
+    /*
        int comptePulse = 0;
   // SOFT_TIMER_Update(); // A decommenter pour utiliser des compteurs logiciels
    
