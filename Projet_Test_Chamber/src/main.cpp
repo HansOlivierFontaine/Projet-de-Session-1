@@ -16,7 +16,7 @@ Inclure les librairies de functions que vous voulez utiliser
 /* ****************************************************************************
 Variables globales et defines
 **************************************************************************** */
-
+#define comptePulseTheo 3200 ;
 double speedGauche = 0.625;
 double speedDroite = 0.6;
 int delayEntreMouvement = 200;
@@ -67,44 +67,55 @@ void Decceleration()
     MOTOR_SetSpeed(RIGHT, 0);
 }
 
-void PIDBasic()
-{
-    
-    int comptePulseGauche = 0;
-    int comptePulseDroit = 0;
-    float rapportErreur = 0;
 
-    comptePulseDroit = ENCODER_Read(RIGHT);
-    comptePulseGauche = ENCODER_Read(LEFT);
+
+
+
+void PIDParMoteur(int valeurCunt)
+{ 
+    int  comptePulseG = 0;
+    int comptePulseD = 0;
+    int  comptePulseGTot = 0;
+    int comptePulseDTot = 0;
+    nbCycle = 1;
+
+    float compteErreurDTot = 0;
+    float compteErreurGTot = 0;
+    float compteErreurD = 0;
+    float compteErreurG = 0;
+
+    int comptePulseTheoCycle= 0 ;
+     
+    // 1 seconde
+    
+    comptePulseD = ENCODER_Read(RIGHT);
+    comptePulseG = ENCODER_Read(LEFT);
+    
+    comptePulseDTot+=   comptePulseD;
+    comptePulseGTot+= comptePulseG;
 
     delay(10);
-   /* 
-    Serial.print("Moteur Gauche =");
-    Serial.println(speedGauche);
-    Serial.print("Moteur Droit ="); 
-    Serial.println(speedDroite);
-    */
-    rapportErreur = (comptePulseDroit - comptePulseGauche);
 
-    float KI = (nbCycle * 5000 ) - comptePulseGauche ; 
-    Serial.print("nbCylce  =");
-    Serial.println(nbCycle, 5);
-    Serial.print("AVANT KI  =");
-    Serial.println(KI, 5);
-    KI = KI * 0.00002; 
+    compteErreurD = valeurCunt - comptePulseD;
+    compteErreurG = valeurCunt - comptePulseG;
 
-    speedGauche += (rapportErreur * 0.0001);
+    comptePulseTheoCycle = nbCycle*valeurCunt;
 
-    MOTOR_SetSpeed(LEFT, speedGauche);
 
-    Serial.print("KI  =");
-    Serial.println(KI, 5);
-    Serial.print("Moteur Gauche =");
-    Serial.println(speedGauche);
-    /**/
+    compteErreurDTot = comptePulseTheoCycle - comptePulseDTot;
+    speedDroite+= (compteErreurDTot * 0.00002)+(compteErreurD * 0.0001) ;
+    
+    compteErreurGTot = comptePulseTheoCycle - comptePulseGTot;
+    speedGauche+= (compteErreurGTot * 0.00002)+(compteErreurG * 0.0001) ;
+ 
 
-    delay(5);
+    nbCycle++;
+    ENCODER_Reset(RIGHT);
+    ENCODER_Reset(LEFT);
+
 }
+
+
 
 void Avancer_Cm(int distance)
 {
@@ -126,8 +137,8 @@ void Avancer_Cm(int distance)
         if(temps >= 500)
         {
             nbCycle ++;
-            PIDBasic();
-            temps = 0;
+           PIDParMoteur(3200);
+            temps = 0; 
         }
         else
             temps +=5;

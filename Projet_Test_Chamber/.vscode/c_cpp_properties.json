@@ -4,6 +4,8 @@
         {
             "name": "Win32",
             "includePath": [
+                "d:/Jerome/Github/Projet-de-Session-1/Projet_Test_Chamber/include",
+                "d:/Jerome/Github/Projet-de-Session-1/Projet_Test_Chamber/src",
                 "C:/Users/Jerome/.platformio/packages/framework-arduinoavr/cores/arduino",
                 "C:/Users/Jerome/.platformio/packages/framework-arduinoavr/variants/mega",
                 "d:/Jerome/Github/Projet-de-Session-1/Projet_Test_Chamber/build/piolibdeps/Adafruit INA219_ID160",
@@ -42,6 +44,8 @@
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": "${workspaceRoot}/.vscode/.browse.c_cpp.db",
                 "path": [
+                    "d:/Jerome/Github/Projet-de-Session-1/Projet_Test_Chamber/include",
+                    "d:/Jerome/Github/Projet-de-Session-1/Projet_Test_Chamber/src",
                     "C:/Users/Jerome/.platformio/packages/framework-arduinoavr/cores/arduino",
                     "C:/Users/Jerome/.platformio/packages/framework-arduinoavr/variants/mega",
                     "d:/Jerome/Github/Projet-de-Session-1/Projet_Test_Chamber/build/piolibdeps/Adafruit INA219_ID160",
