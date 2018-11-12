@@ -1,4 +1,3 @@
-
 /*
 Projet: CharlUS V0.000001
 Equipe: P-16
@@ -12,80 +11,169 @@ Inclure les librairies de functions que vous voulez utiliser
 **************************************************************************** */
 
 #include <LibRobus.h> // Essentielle pour utiliser RobUS
-
-long Counter = 0;
-float circumference = 3.1415926 * 7.5;
-float CenterCircumference = 3.1415926 * 220;
-float Wheelcircumference = 3.1415926 * 75;
-long GearParCm = 32000 / Wheelcircumference;
 /* ****************************************************************************
 Variables globales et defines
 **************************************************************************** */
+#define comptePulseTheo 3200;
+double speedGauche = 0.42;
+double speedDroite = 0.4;
+
+//#define PI 3.1415926
 // -> defines...
 // L'ensemble des fonctions y ont acces
 
 /* ****************************************************************************
 Vos propres fonctions sont creees ici
 **************************************************************************** */
-void Avancer_Cm(int input)
+
+void Acceleration()
 {
-
-    int distance = input * 1.10;
-    long GearParCm = 32000 / circumference;
-    long GearCount = (GearParCm * (distance));
-    GearCount = GearCount / 10;
-
-    Serial.print("START");
-    ENCODER_Reset(LEFT);
-    MOTOR_SetSpeed(LEFT, 0.5);
-    MOTOR_SetSpeed(RIGHT, 0.5);
-    while (Counter < GearCount)
+    for (int i = 1; i <= 100; i++)
     {
-        Counter = ENCODER_Read(LEFT);
-        delay(5);
-    }
-    MOTOR_SetSpeed(LEFT, 0.0);
-    MOTOR_SetSpeed(RIGHT, 0.0);
+        float pourcentage = i * 0.01;
 
-    Serial.print("END");
+        MOTOR_SetSpeed(RIGHT , speedDroite * pourcentage);
+        MOTOR_SetSpeed(LEFT, speedGauche * pourcentage);
+        delay(30);
+    }
+}
+
+void Decceleration()
+{
+    for (int i = 100; i >= 1; i--)
+    {
+        float pourcentage = i * 0.01;
+
+        MOTOR_SetSpeed(RIGHT , speedDroite * pourcentage);
+        MOTOR_SetSpeed(LEFT, speedGauche * pourcentage);
+        delay(30);
+    }
+}
+
+
+int lireDistanceInfraRobot(int sensor)
+{
+    return ROBUS_ReadIR(sensor);
+}
+
+void Avancer_Cm(int distance)
+{
+    long compteur = 0;
+
+    float circonference = 3.1415926 * 7.5;
+    long pulseParCm = 32000 / circonference;
+    long comptePulse = (pulseParCm * (distance));
+    comptePulse = comptePulse / 10;
+   
+    ENCODER_Reset(RIGHT);
+    ENCODER_Reset(LEFT);
+
+    speedGauche = 0.42;
+    speedDroite = 0.4;
+    Acceleration();
+    while (compteur < comptePulse)
+    {
+        delay(5);
+        compteur = ENCODER_Read(RIGHT);
+    }
+    Decceleration();
+
     delay(200);
 }
 
-void Tourne_Deg(int degree)
+void Reculer_Cm(int distance)
 {
-    int Turn = degree;
-    long GearCount = (GearParCm * (Turn));
-    GearCount = GearCount / 10;
+    long compteur = 0;
 
-    //don't do it!
-    MOTOR_SetSpeed(RIGHT, -0.2);
-    MOTOR_SetSpeed(LEFT, 0.2);
-    delay(700);
+    float circonference = 3.1415926 * 7.5;
+    long pulseParCm = 32000 / circonference;
+    long comptePulse = (pulseParCm * (distance));
+    comptePulse = comptePulse / 10;
+   
+    ENCODER_Reset(RIGHT);
+    ENCODER_Reset(LEFT);
+
+    speedGauche = -0.42;
+    speedDroite = -0.4;
+    Acceleration();
+    while (compteur < comptePulse)
+    {
+        delay(5);
+        compteur = ENCODER_Read(RIGHT);
+    }
+    Decceleration();
+
+    delay(200);
+}
+
+void Tourne_Gauche()
+{
+    int comptePulse;
+    ENCODER_Reset(LEFT);
+    ENCODER_Reset(RIGHT);
+
+    MOTOR_SetSpeed(RIGHT, 0.4);
+    MOTOR_SetSpeed(LEFT, 0);
+
+    comptePulse = 0;
+    while (comptePulse <= (1.18 * 3200))
+    {
+        comptePulse = ENCODER_Read(RIGHT);
+        delay(10);
+    }
 
     MOTOR_SetSpeed(LEFT, 0);
     MOTOR_SetSpeed(RIGHT, 0);
 }
 
-void Tourne(int Dir, int delai)
+void Tourne_Droite()
 {
-    if (Dir == RIGHT)
-    {
-        MOTOR_SetSpeed(RIGHT, 0);
-        MOTOR_SetSpeed(LEFT, 0.6);
-        delay(delai);
+    int comptePulse;
+    ENCODER_Reset(LEFT);
+    ENCODER_Reset(RIGHT);
 
-        MOTOR_SetSpeed(LEFT, 0);
-        MOTOR_SetSpeed(RIGHT, 0);
-    }
-    else if (Dir == LEFT)
+    MOTOR_SetSpeed(RIGHT, 0);
+    MOTOR_SetSpeed(LEFT, 0.4);
+    comptePulse = 0;
+    while (comptePulse <= (1.18 * 3200))
     {
-        MOTOR_SetSpeed(RIGHT, 0.6);
-        MOTOR_SetSpeed(LEFT, 0);
-        delay(delai);
-
-        MOTOR_SetSpeed(LEFT, 0);
-        MOTOR_SetSpeed(RIGHT, 0);
+        comptePulse = ENCODER_Read(LEFT);
+        delay(10);
     }
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
+}
+//À modifier pour que le robot tourne sur lui-même 
+void Demi_Tour()
+{
+    int comptePulse;
+    ENCODER_Reset(LEFT);
+    ENCODER_Reset(RIGHT);
+
+    MOTOR_SetSpeed(RIGHT, 0);
+    MOTOR_SetSpeed(LEFT, 0.4);
+    comptePulse = 0;
+    while (comptePulse <= (1.18 * 3200))
+    {
+        comptePulse = ENCODER_Read(LEFT);
+        delay(10);
+    }
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
+
+    ENCODER_Reset(LEFT);
+    ENCODER_Reset(RIGHT);
+
+    MOTOR_SetSpeed(RIGHT, 0.4);
+    MOTOR_SetSpeed(LEFT, 0);
+    comptePulse = 0;
+    while (comptePulse <= (1.18 * 3200))
+    {
+        comptePulse = ENCODER_Read(LEFT);
+        delay(10);
+    }
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
 }
 
 /* ****************************************************************************
@@ -95,58 +183,18 @@ Fonctions d'initialisation (setup)
 // -> Se fait appeler seulement un fois
 // -> Generalement on y initilise les varibbles globales
 
-//Initiation des variables globales
 void setup()
 {
     BoardInit();
-    //Initiation
+    pinMode(LED_BUILTIN, OUTPUT);
+    Serial.begin(9600);
 }
 
 /* ****************************************************************************
-Fonctions de boucle infini (loop())
+Fonctions de boucle infini (nloop())
 **************************************************************************** */
 // -> Se fait appeler perpetuellement suite au "setup"
 
 void loop()
 {
-    // SOFT_TIMER_Update(); // A decommenter pour utiliser des compteurs logiciels
-    delay(2000);
-    Avancer_Cm(190);
-
-    //DEBUT DU U
-    Tourne(LEFT, 680); //90 degree
-
-    Avancer_Cm(30);
-
-    Tourne(RIGHT, 680); //90 degree
-
-    Avancer_Cm(25);
-
-    Tourne(RIGHT, 680); //90 degree
-
-    Avancer_Cm(30);
-    //FIN DU U
-
-    Tourne(LEFT, 360); //45 degree
-
-    Avancer_Cm(50);
-
-    Tourne(LEFT, 680); //90 degree
-
-    Avancer_Cm(50);
-
-    Tourne(RIGHT, 360); //45 degree
-
-    Avancer_Cm(30);
-
-    MOTOR_SetSpeed(RIGHT, 0);
-    MOTOR_SetSpeed(LEFT, 0.6);
-    delay(250);
-
-    MOTOR_SetSpeed(LEFT, 0);
-    MOTOR_SetSpeed(RIGHT, 0);
-    Avancer_Cm(75);
-
-    //Tourne_Deg(90);
-    delay(5000);
 }

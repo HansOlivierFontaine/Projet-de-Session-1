@@ -6,16 +6,17 @@ General librairies for Robus robot
 */
 #ifndef LibRobus_H_
 #define LibRobus_H_
-#define SERVOTIMER5 // Pour utiliser le compteur 1 pour les servomoteurs
 
 // Includes
-  // Custom librairies
+  // Custom libraries
   #include <Robus/Robus.h>
   #include <ArduinoX/ArduinoX.h>
   #include <AudioPlayer/AudioPlayer.h>
   #include <DisplayLCD/DisplayLCD.h>
   #include <VexQuadEncoder/VexQuadEncoder.h>
   #include <SoftTimer/SoftTimer.h>
+
+  // Third party libraries
   #include <IRremote/IRremote.h>
 
 
@@ -30,7 +31,7 @@ General librairies for Robus robot
 #define BAUD_RATE_BLUETOOTH 115200
 #define SerialBT Serial2
 #define SerialAudio Serial3
-#define IR_RECV_PIN 35	/* TODO Change pin number because pin number 35 is reserved for encoder 2 */
+#define IR_RECV_PIN 37
 
 
 // Objects creation
@@ -62,8 +63,7 @@ void BoardInit(){
   __Robus__.init();
 
   // init telecommande
-  /* TODO uncomment when "IR_RECV_PIN" is fixed */
-  //__irrecv__.enableIRIn(); // Start the receiver
+  __irrecv__.enableIRIn(); // Start the receiver
 };
 
 /** Function to initialize audio variables
@@ -281,6 +281,7 @@ time (ms) buzzer is active
 void AX_BuzzerON(uint32_t freq, uint64_t duration){
   __AX__.buzzerOn(freq, duration);
 };
+
 /** Function turn off the onboard buzzer
 */
 void AX_BuzzerOFF(){
@@ -313,7 +314,6 @@ return number on 16bits
 uint16_t ROBUS_ReadIR(uint8_t id){
   return __Robus__.readIR(id);
 };
-
 
 /** Function to enable a servomotor
 @param id
@@ -497,16 +497,16 @@ String BLUETOOTH_read(){
   return inputString;
 }
 
-/** Function to write a message to Bluetooth module
-@note for Sunfounder Serial Bluetooth
+/** Function to return decoded ir message
+@return 0 if no message
 
-@param msg
-a string message to be sent via bluetooth to paired
+@return code on a uint32_t
+
 */
 uint32_t REMOTE_read(){
   if (__irrecv__.decode(&IR_MSG)) {
     __irrecv__.resume(); // Receive the next value
-    Serial.println(IR_MSG.value);
+    // Serial.println(IR_MSG.value);
     return IR_MSG.value;
   }
   return 0;

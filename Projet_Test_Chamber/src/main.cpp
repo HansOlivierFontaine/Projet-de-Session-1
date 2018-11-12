@@ -103,9 +103,9 @@ void PIDParMoteur(int valeurCunt)
     ENCODER_Reset(LEFT);
 
 }
-int lireDistanceInfraRobot()
+int lireDistanceInfraRobot(int sensor)
 {
-    
+    ROBUS_ReadIR(sensor);
 }
 
 void pognerBallon()
@@ -113,27 +113,25 @@ void pognerBallon()
 
 void signalHandlerDistance(int signalSent)
 {
-    
 }
 
 void mouvementAttaquant()
 {
-    int n,m,i =0;
-    float tour =0;
-    float totMur =0;
-    int mur =0;
-    float captH =0;
-    float captB =0;
+    float captH = lireDistanceInfraRobot();
+    float captB = lireDistanceInfraRobot();
 
-   if(captB<=captH-20)
+   if(captB <= captH-20)
     {
         MOTOR_SetSpeed(RIGHT, 0.5);
         MOTOR_SetSpeed(LEFT, 0.5);
+
         while(captB > 5){
             delay(10);
             captB = lireDistanceInfraRobot();
         };
+
         while(captH > 15 || couleur == blanc || couleur == noir){};
+
         if(couleur != blanc && couleur != noir)
         {
             if(couleur == vert)
@@ -157,17 +155,24 @@ void mouvementAttaquant()
     }
     else if (captH < 50 && captB < 50)
     {
-        compteur =0;
+        compteur = 0;
+
         MOTOR_SetSpeed(RIGHT, 0.5);
         MOTOR_SetSpeed(LEFT, 0.5);
+
+        /*
         while(captH < 50 && captB < 50 && compteur < 200)
         {
             delay(10);
-            compteur+=1;
+            compteur += 1;
         }
+
         MOTOR_SetSpeed(RIGHT, -0.5);
         MOTOR_SetSpeed(LEFT, -0.5);
+
         Tourne45;
+        */
+
     }else if(couleur == noir)
     {
         MOTOR_SetSpeed(RIGHT, -1.0);
@@ -308,14 +313,18 @@ Fonctions de boucle infini (loop())
 
 void loop()
 {
-    Bouton bouton;
+    int iSecret = rand() % 1 + 1;
+
+    serial.println(iSecret);
+
+    /*Bouton bouton;
     while(!bouton)
     {
         delay(10);
     }
     dealy(5000);
     signal(1, signalHandlerDistance);
-    mouvementAttaquant;
+    mouvementAttaquant();*/
     /*
        int comptePulse = 0;
   // SOFT_TIMER_Update(); // A decommenter pour utiliser des compteurs logiciels
