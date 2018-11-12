@@ -32,7 +32,7 @@ void Acceleration()
     {
         float pourcentage = i * 0.01;
 
-        MOTOR_SetSpeed(RIGHT , speedDroite * pourcentage);
+        MOTOR_SetSpeed(RIGHT, speedDroite * pourcentage);
         MOTOR_SetSpeed(LEFT, speedGauche * pourcentage);
         delay(30);
     }
@@ -44,12 +44,11 @@ void Decceleration()
     {
         float pourcentage = i * 0.01;
 
-        MOTOR_SetSpeed(RIGHT , speedDroite * pourcentage);
+        MOTOR_SetSpeed(RIGHT, speedDroite * pourcentage);
         MOTOR_SetSpeed(LEFT, speedGauche * pourcentage);
         delay(30);
     }
 }
-
 
 int lireDistanceInfraRobot(int sensor)
 {
@@ -64,7 +63,7 @@ void Avancer_Cm(int distance)
     long pulseParCm = 32000 / circonference;
     long comptePulse = (pulseParCm * (distance));
     comptePulse = comptePulse / 10;
-   
+
     ENCODER_Reset(RIGHT);
     ENCODER_Reset(LEFT);
 
@@ -89,7 +88,7 @@ void Reculer_Cm(int distance)
     long pulseParCm = 32000 / circonference;
     long comptePulse = (pulseParCm * (distance));
     comptePulse = comptePulse / 10;
-   
+
     ENCODER_Reset(RIGHT);
     ENCODER_Reset(LEFT);
 
@@ -143,7 +142,7 @@ void Tourne_Droite()
     MOTOR_SetSpeed(LEFT, 0);
     MOTOR_SetSpeed(RIGHT, 0);
 }
-//À modifier pour que le robot tourne sur lui-même 
+//À modifier pour que le robot tourne sur lui-même
 void Demi_Tour()
 {
     int comptePulse;
@@ -188,6 +187,8 @@ void setup()
     BoardInit();
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(9600);
+    SERVO_Enable(1);
+    SERVO_Enable(0);
 }
 
 /* ****************************************************************************
@@ -197,4 +198,16 @@ Fonctions de boucle infini (nloop())
 
 void loop()
 {
+    SERVO_SetAngle(1, 180);
+    delay(500);
+    SERVO_SetAngle(0, 0);
+    delay(3000);
+    SERVO_SetAngle(1, 90);
+    delay(3000);
+    SERVO_SetAngle(0, 90);
+    delay(3000);
+    SERVO_SetAngle(1, 180);
+    delay(3000);
+    SERVO_SetAngle(0, 0);
+    delay(3000);
 }
