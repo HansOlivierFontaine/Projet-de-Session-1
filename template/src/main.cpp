@@ -18,6 +18,10 @@ Variables globales et defines
 #define comptePulseTheo 3200;
 double speedGauche = 0.42;
 double speedDroite = 0.4;
+int servoDroit = 0;
+int servoGauche = 1;
+int inputButtonStart = 0;
+int inputButtonDifficulte = 5;
 
 //#define PI 3.1415926
 // -> defines...
@@ -254,6 +258,48 @@ void setup()
     SERVO_Enable(0);*/
 }
 
+void MoveServoMoteur(int servo, int angle)
+{
+    SERVO_SetAngle(servo, angle);
+}
+
+bool buttonPress(int analogButtonInput)
+{
+    int press = analogRead(analogButtonInput);
+
+    if(press == 1023)
+    {
+        int outputPress = 1023;
+
+        while(outputPress >= 1000)
+        {
+        outputPress = analogRead(analogButtonInput);
+        Serial.println(outputPress);
+        }
+        return true;
+    }
+    return false;
+}
+
+int choixDifficulte()
+{
+    int start = 0;
+    int difficulte = 1;
+
+    while(!start)
+    {
+        start = buttonPress(inputButtonStart);
+
+        bool buttonDifficulteTrigger = buttonPress(inputButtonDifficulte);
+
+        if(buttonDifficulteTrigger)
+        {
+            difficulte++;
+        }
+    }
+    return difficulte;
+}
+
 /* ****************************************************************************
 Fonctions de boucle infini (nloop())
 **************************************************************************** */
@@ -264,22 +310,11 @@ Fonctions de boucle infini (nloop())
 
 void loop()
 {
-
-    //LEDSTRIP_Standby();
     LEDSTRIP_Level(0);
     LEDSTRIP_Level(1);
     LEDSTRIP_Level(2);
 
-    /*
-    delay(1000);
-    Tourne_Droite();
-    Tourne_Gauche();
-    delay(500);
-    Demi_Tour();
-    delay(1000);
-    Avancer_Cm(15);
-    delay(1000);
-    Reculer_Cm(15);
-    delay(5000);
-*/
+    int difficulte = choixDifficulte();
+
+    Serial.println(difficulte);
 }
