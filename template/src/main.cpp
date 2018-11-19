@@ -27,15 +27,15 @@ double speedDroite = 0.4;
 #include <stdlib.h>
 int servoMoteurDroit = 1;
 int servoMoteurGauche = 0;
-int inputButtonStart = 2;
-int inputButtonDifficulte = 3;
+int inputButtonStart = 6;
+int inputButtonDifficulte = 5;
 int count = 1;
 
 //Lumière
-#define LED_PIN     4
-#define NUM_LEDS    120
-#define BRIGHTNESS  100
-#define LED_TYPE    WS2811
+#define LED_PIN 10
+#define NUM_LEDS 120
+#define BRIGHTNESS 100
+#define LED_TYPE WS2811
 #define COLOR_ORDER GRB
 CRGB leds[NUM_LEDS];
 
@@ -216,6 +216,7 @@ void suivre_la_ligne()
 {
     static int derniereDirectionEnregistree = 0;
     Serial.println("Fonction suivre_la_ligne");
+    
     int lectureInitiale;
 
     if (analogRead(IRDevantPin) < 600)
@@ -231,7 +232,7 @@ void suivre_la_ligne()
 
     if ((analogRead(IRDevantPin) < 600) && derniereDirectionEnregistree == 1)
     {
-        MOTOR_SetSpeed(LEFT, 0.);
+        MOTOR_SetSpeed(LEFT, 0);
         MOTOR_SetSpeed(RIGHT, 0.2);
         while (analogRead(IRDevantPin) < 600)
             delay(50);
@@ -241,7 +242,7 @@ void suivre_la_ligne()
     {
 
         MOTOR_SetSpeed(LEFT, 0.2);
-        MOTOR_SetSpeed(RIGHT, 0.);
+        MOTOR_SetSpeed(RIGHT, 0);
 
         derniereDirectionEnregistree = 1;
 
@@ -284,11 +285,11 @@ void suivre_la_ligne()
                 delay(50);
             }
         }
+    }
         /*
         int lecture = 1000;
         lecture = analogRead(IRInterieurPin);
-        while (lecture > 500)
-        {
+        
             int lecture1, lecture2;
             lecture =  analogRead(IRInterieurPin);
             delay (50);
@@ -304,13 +305,12 @@ void suivre_la_ligne()
             Serial.println(lecture1 );
             Serial.print("lecture2 : ");
             Serial.println(lecture2 );
-            delay (3000);
-        }*/
-    }
+            delay (2000);
+    
     delay(100);
     MOTOR_SetSpeed(LEFT, 0.);
     MOTOR_SetSpeed(RIGHT, 0.);
-    delay(1000);
+    delay(1000);*/
 }
 
 JEU getPositionBalles(int difficulte)
@@ -335,6 +335,7 @@ JEU getPositionBalles(int difficulte)
                               {{4, 1}, {0, 1}},
                               {{3, 1}, {1, 1}}};
 
+    difficulte = 1;
     if (difficulte == 0)
     {
         nbrAleatoire = rand() % 6;
@@ -349,6 +350,7 @@ JEU getPositionBalles(int difficulte)
     else if (difficulte == 1)
     {
         nbrAleatoire = rand() % 4;
+        nbrAleatoire = 2;
         balles.blancheX = moyen[nbrAleatoire][0][0];
         balles.blancheY = moyen[nbrAleatoire][0][1];
         balles.couleurX = moyen[nbrAleatoire][1][0];
@@ -416,37 +418,33 @@ void CalculerPositionY(int *positionY, int *orientation)
 void tournerDroite(int *orientation)
 {
     Serial.println("Fonction tournerDroite :");
-    MOTOR_SetSpeed(LEFT, 0.15);
-    MOTOR_SetSpeed(RIGHT, -0.1);
-    while (analogRead(IRDevantPin) > 600)
+    MOTOR_SetSpeed(LEFT, 0.1);
+    MOTOR_SetSpeed(RIGHT, -0.2);
+    delay(500);
+    int hasALine = 0;
+    while (hasALine < 600)
     {
-        delay(50);
+        hasALine = analogRead(IRDevantPin);
     }
-    while (analogRead(IRDevantPin) < 600)
-    {
-        delay(50);
-    }
-    MOTOR_SetSpeed(LEFT, 0.);
-    MOTOR_SetSpeed(RIGHT, 0.);
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
     *orientation = (*orientation + 1) % 4;
 }
 
 void tournerGauche(int *orientation)
 {
     Serial.println("Fonction tournerGauche :");
-    MOTOR_SetSpeed(LEFT, -0.1);
-    MOTOR_SetSpeed(RIGHT, 0.15);
-    while (analogRead(IRDevantPin) > 600)
+    MOTOR_SetSpeed(LEFT, -0.2);
+    MOTOR_SetSpeed(RIGHT, 0.1);
+    delay(500);
+    int hasALine = 0;
+    while (hasALine < 600)
     {
-        delay(50);
+        hasALine = analogRead(IRDevantPin);
     }
-    while (analogRead(IRDevantPin) < 600)
-    {
-        delay(50);
-    }
-    MOTOR_SetSpeed(LEFT, 0.);
-    MOTOR_SetSpeed(RIGHT, 0.);
-    *orientation = (*orientation - 1) % 4;
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
+    *orientation = (*orientation + 1) % 4;
 }
 
 void positionnerBalle(int balleX, int balleY, int *positionX, int *positionY, int *orientation)
@@ -522,14 +520,12 @@ void lancerPartie(int difficultee)
     int *positionX;
     int *positionY;
     int *orientation;
-    //int difficultee = 0;
 
     positionX = &x;
     positionY = &y;
     orientation = &orientationReal;
 
     JEU balles;
-    int test = rand() % 3;
 
     balles = getPositionBalles(difficultee);
 
@@ -548,7 +544,7 @@ void lancerPartie(int difficultee)
         {
             tournerDroite(orientation);
         }
-        SERVO_SetAngle(PINBLANCHE, 30);
+        //SERVO_SetAngle(PINBLANCHE, 30);
     }
 
     positionnerBalle(balles.couleurX, balles.couleurY, positionX, positionY, orientation);
@@ -562,7 +558,7 @@ void lancerPartie(int difficultee)
         {
             tournerDroite(orientation);
         }
-        SERVO_SetAngle(PINBLANCHE, 30);
+        //SERVO_SetAngle(PINBLANCHE, 30);
     }
 
     retourRobot(positionX, positionY, orientation);
@@ -586,6 +582,38 @@ bool buttonPress(int analogButtonInput)
     return false;
 }
 
+void LEDSTRIP_Level(int level)
+{
+    int color;
+
+    if (level == 0)
+        color = CRGB::Blue;
+    if (level == 1)
+        color = CRGB::Yellow;
+    if (level == 2)
+        color = CRGB::Pink;
+
+    memset(leds, 0, NUM_LEDS * 3);
+    for (int i = 0; i < 60; i++)
+    {
+
+        //leds[i-1] = CRGB::Black;
+        leds[i] = color;
+
+        FastLED.show();
+        delay(10);
+    }
+
+    for (int i = BRIGHTNESS; i >= 0; i--)
+    {
+        FastLED.setBrightness(i);
+        FastLED.show();
+        delay(10);
+    }
+
+    FastLED.setBrightness(BRIGHTNESS);
+}
+
 int choixDifficulte()
 {
     int start = 0;
@@ -598,42 +626,13 @@ int choixDifficulte()
         bool buttonDifficulteTrigger = buttonPress(inputButtonDifficulte);
 
         if (buttonDifficulteTrigger)
-        {           
+        {
             difficulte++;
+            Serial.println(difficulte % 3);
             LEDSTRIP_Level(difficulte % 3);
         }
     }
     return difficulte;
-}
-
-void LEDSTRIP_Level(int level)
-{
-    int color;
-    if(level == 0)
-        color = CRGB::Green;
-    if(level == 1)
-        color = CRGB::Yellow;
-    if(level == 2)
-        color = CRGB::Red;
-
-    memset(leds, 0, NUM_LEDS * 3);
-    for(int i = 0 ; i < 60; i++ ) {
-
-    //leds[i-1] = CRGB::Black;
-    leds[i] = color;
-    
-    FastLED.show();
-    delay(10);
-    }
-
-    for(int i =BRIGHTNESS; i >= 0 ; i--)
-    {
-      FastLED.setBrightness( i );
-        FastLED.show();
-      delay(10);
-    }
-
-   FastLED.setBrightness(BRIGHTNESS);
 }
 
 /* ****************************************************************************
@@ -649,10 +648,10 @@ void setup()
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(9600);
 
-    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-    FastLED.setBrightness(  BRIGHTNESS );
+    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+    FastLED.setBrightness(BRIGHTNESS);
     MoveServoMoteur(servoMoteurGauche, 10);
-    MoveServoMoteur(servoMoteurGauche, 170);
+    MoveServoMoteur(servoMoteurDroit, 170);
 }
 
 /* ****************************************************************************
@@ -662,71 +661,83 @@ Fonctions de boucle infini (nloop())
 
 void loop()
 {
+
     //Attend le choix de difficulté de l'utilisateur
     int difficulte = choixDifficulte() % 3;
 
-    MOTOR_SetSpeed(RIGHT, 0.3);
-    MOTOR_SetSpeed(LEFT, 0.31);
+    lancerPartie(difficulte);
+    //suivre_la_ligne();
 
-    int distance = lireDistanceInfraRobot(0);
-
-    if (distance > 500)
+    /*int distance = 0;
+    while (true)
     {
-        if (count == 1)
+        MOTOR_SetSpeed(RIGHT, 0.31);
+        MOTOR_SetSpeed(LEFT, 0.3);
+
+        distance = lireDistanceInfraRobot(0);
+
+        if (distance > 250)
         {
-            MOTOR_SetSpeed(RIGHT, 0);
-            MOTOR_SetSpeed(LEFT, 0);
-            delay(3000);
+            if (count == 1)
+            {
+                MOTOR_SetSpeed(RIGHT, 0);
+                MOTOR_SetSpeed(LEFT, 0);
+                delay(3000);
 
-            Tourne_Droite();
+                Tourne_Droite();
 
-            MoveServoMoteur(servoMoteurGauche, 90);
+                MoveServoMoteur(servoMoteurGauche, 90);
 
-            MOTOR_SetSpeed(RIGHT, 0.1);
-            MOTOR_SetSpeed(LEFT, 0.1);
-            delay(500);
+                delay(1000);
 
-            MOTOR_SetSpeed(RIGHT, 0);
-            MOTOR_SetSpeed(LEFT, 0);
+                MOTOR_SetSpeed(RIGHT, 0.1);
+                MOTOR_SetSpeed(LEFT, 0.1);
+                delay(1500);
 
-            MoveServoMoteur(servoMoteurGauche, 10);
+                MOTOR_SetSpeed(RIGHT, 0);
+                MOTOR_SetSpeed(LEFT, 0);
+
+                MoveServoMoteur(servoMoteurGauche, 10);
+            }
+            else if (count == 2)
+            {
+                MOTOR_SetSpeed(RIGHT, 0);
+                MOTOR_SetSpeed(LEFT, 0);
+                delay(3000);
+
+                Tourne_Droite();
+            }
+            else if (count == 3)
+            {
+                MOTOR_SetSpeed(RIGHT, 0);
+                MOTOR_SetSpeed(LEFT, 0);
+                delay(3000);
+
+                Tourne_Droite();
+
+                MoveServoMoteur(servoMoteurDroit, 90);
+
+                delay(1000);
+
+                MOTOR_SetSpeed(RIGHT, 0.1);
+                MOTOR_SetSpeed(LEFT, 0.1);
+                delay(1500);
+
+                MOTOR_SetSpeed(RIGHT, 0);
+                MOTOR_SetSpeed(LEFT, 0);
+
+                MoveServoMoteur(servoMoteurDroit, 170);
+            }
+            else if (count == 4)
+            {
+                MOTOR_SetSpeed(RIGHT, 0);
+                MOTOR_SetSpeed(LEFT, 0);
+                delay(3000);
+
+                Tourne_Droite();
+                delay(30000);
+            }
+            count++;
         }
-        else if (count == 2)
-        {
-            MOTOR_SetSpeed(RIGHT, 0);
-            MOTOR_SetSpeed(LEFT, 0);
-            delay(3000);
-
-            Tourne_Droite();
-
-            MoveServoMoteur(servoMoteurDroit, 90);
-
-            MOTOR_SetSpeed(RIGHT, 0.1);
-            MOTOR_SetSpeed(LEFT, 0.1);
-            delay(500);
-
-            MOTOR_SetSpeed(RIGHT, 0);
-            MOTOR_SetSpeed(LEFT, 0);
-
-            MoveServoMoteur(servoMoteurGauche, 170);
-        }
-        else if(count == 3)
-        {
-            MOTOR_SetSpeed(RIGHT, 0);
-            MOTOR_SetSpeed(LEFT, 0);
-            delay(3000);
-
-            Tourne_Droite();
-        }
-        else if(count == 4)
-        {
-            MOTOR_SetSpeed(RIGHT, 0);
-            MOTOR_SetSpeed(LEFT, 0);
-            delay(3000);
-
-            Tourne_Droite();
-            delay(30000);
-        }
-        count++;
-    }
+    }*/
 }
