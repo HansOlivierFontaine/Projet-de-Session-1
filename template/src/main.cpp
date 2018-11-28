@@ -12,6 +12,8 @@ Inclure les librairies de functions que vous voulez utiliser
 
 #include <LibRobus.h> // Essentielle pour utiliser RobUS
 #include <fastLED.h>
+#include <time.h>
+#include <stdlib.h>
 /* ****************************************************************************
 Variables globales et defines
 **************************************************************************** */
@@ -33,14 +35,19 @@ int valeurMaxGauche = 0;
 int valeurMaxCentre = 0;
 
 //Lumière
-#define LED_PIN 10
+#define LED_PIN 8
 #define NUM_LEDS 120
 #define BRIGHTNESS 100
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
 CRGB leds[NUM_LEDS];
 
-//#define PI 3.1415926
+#define PINDURE  53
+#define PINMOYEN  23
+#define PINFACILE  45
+#define PINLEDMODE  49
+
+
 // -> defines...
 // L'ensemble des fonctions y ont acces
 
@@ -67,198 +74,78 @@ int LireDistanceInfraRobot(int sensor)
 
 void Suivre_la_ligne()
 {
-    int gage = 300;
+    int gage = 350;
+    int gageDroit = 500;
 
     MOTOR_SetSpeed(RIGHT, speedDroite);
     MOTOR_SetSpeed(LEFT, speedGauche);
 
-    int centre = 0;
-    int gauche = 0;
-    int droite = 0;
-
-
-    while (centre < gage && gauche < gage && droite < gage)
-    {
-    centre = analogRead(IRCentrePin);
-    gauche = analogRead(IRGauchePin);//* 1.5;
-    droite = analogRead(IRDroitePin);// * 1.5;
-
-    if(centre < gage && gauche < gage && droite < gage)
-    {
-        Serial.println("go back");
-        //MOTOR_SetSpeed(LEFT,-0.2);
-        //MOTOR_SetSpeed(RIGHT,-0.2);
-    }
-
-    else if(centre > gage && gauche < gage && droite < gage)
-    {
-        Serial.println("go straight");
-        MOTOR_SetSpeed(LEFT,0.2);
-        MOTOR_SetSpeed(RIGHT,0.2);
-
-    }
-    else if(centre > gage && gauche > gage && droite < gage)
-    {
-        Serial.println("go leftish");//slight boost left engine
-        MOTOR_SetSpeed(LEFT,0.15);
-        MOTOR_SetSpeed(RIGHT,0.2);
-    }
-    else if(centre > gage && gauche < gage && droite > gage)
-    {
-        Serial.println("go rightish");  //slight boost right engine
-        MOTOR_SetSpeed(LEFT,0.2);
-        MOTOR_SetSpeed(RIGHT,0.15);
-    }
-    else if(centre < gage && gauche > gage && droite < gage)
-    {
-        Serial.println("go full left");//big change turn right 
-        MOTOR_SetSpeed(LEFT,0.05);
-        MOTOR_SetSpeed(RIGHT,0.15);
-    }
-    else if(centre < gage && gauche < gage && droite > gage)
-    {
-        Serial.println("go full right");// big change turn left
-        MOTOR_SetSpeed(LEFT,0.15);
-        MOTOR_SetSpeed(RIGHT,0.05);
-    }
-
-    }
-    /*
-
-    delay(500);
+    delay(250);
 
     int centre = 0;
     int gauche = 0;
     int droite = 0;
 
-    while (centre < valeurMaxCentre && gauche < valeurMaxGauche && droite < valeurMaxDroit)
+    while (true)
     {
+        int pressStop = analogRead(inputButtonStart);
+
+        if (pressStop >= 1000)
+        {
+            while (true)
+            {
+                MOTOR_SetSpeed(RIGHT, 0);
+                MOTOR_SetSpeed(LEFT, 0);
+            }
+        }
+
         centre = analogRead(IRCentrePin);
         gauche = analogRead(IRGauchePin);
         droite = analogRead(IRDroitePin);
 
-        if (droite > valeurMaxDroit && centre < valeurMaxCentre)
+        if (centre < gage && gauche < gage && droite < gageDroit)
         {
-            Serial.println("Gauche");
-            speedGauche += 0.05;
-            speedDroite -= 0.05;
-
-            MOTOR_SetSpeed(RIGHT, speedDroite);
-            MOTOR_SetSpeed(LEFT, speedGauche);
+            //Serial.println("go back");
+            //MOTOR_SetSpeed(LEFT, -0.01);
+            //MOTOR_SetSpeed(RIGHT, -0.01);
         }
-        else if (gauche > valeurMaxGauche && centre < valeurMaxCentre)
+        else if (centre > gage && gauche < gage && droite < gageDroit)
         {
-            Serial.println("Droite");
-            speedDroite += 0.05;
-            speedGauche -= 0.05;
-
-            MOTOR_SetSpeed(RIGHT, speedDroite);
-            MOTOR_SetSpeed(LEFT, speedGauche);
+            //Serial.println("go straight");
+            MOTOR_SetSpeed(LEFT, 0.2);
+            MOTOR_SetSpeed(RIGHT, 0.2);
         }
-    }
-
-    delay(5000);
-    /*
-    static int derniereDirectionEnregistree = 0;
-    Serial.println("Fonction Suivre_la_ligne");
-
-    int lectureInitiale;
-
-    if (analogRead(IRCentrePin) < 600)
-    {
-        lectureInitiale = 0;
-        MOTOR_SetSpeed(LEFT, 0);
-        MOTOR_SetSpeed(RIGHT, 0.2);
-        while (analogRead(IRCentrePin) < 600)
-            delay(50);
-    }
-    else
-        lectureInitiale = 1;
-
-    if ((analogRead(IRCentrePin) < 600) && derniereDirectionEnregistree == 1)
-    {
-        MOTOR_SetSpeed(LEFT, 0);
-        MOTOR_SetSpeed(RIGHT, 0.2);
-        while (analogRead(IRCentrePin) < 600)
-            delay(50);
-    }
-
-    while(centre < 600 && gauche < 500 && droite < 500)
-    {
-        centre = analogRead(IRCentrePin);
-        gauche = analogRead(IRGauchePin) * 1.5;
-        droite = analogRead(IRDroitePin) * 1.5;
-
-        MOTOR_SetSpeed(LEFT, 0.2);
-        MOTOR_SetSpeed(RIGHT, 0);
-
-        derniereDirectionEnregistree = 1;
-
-        if (lectureInitiale == 1)
+        else if (centre > gage && gauche > gage && droite < gageDroit)
         {
-            while (analogRead(IRCentrePin) > 600)
-            {
-                delay(50);
-            }
+            //Serial.println("go leftish"); //slight boost left engine
+            MOTOR_SetSpeed(LEFT, 0.15);
+            MOTOR_SetSpeed(RIGHT, 0.2);
         }
-        else
+        else if (centre > gage && gauche < gage && droite > gageDroit)
         {
-            while (analogRead(IRCentrePin) < 600)
-            {
-                delay(50);
-            }
+            //Serial.println("go rightish"); //slight boost right engine
+            MOTOR_SetSpeed(LEFT, 0.2);
+            MOTOR_SetSpeed(RIGHT, 0.15);
         }
-
-        if (centre < 600 && gauche < 500 && droite < 500)
+        else if (centre < gage && gauche > gage && droite < gageDroit)
         {
+            //Serial.println("go full left"); //big change turn right
+            MOTOR_SetSpeed(LEFT, 0.05);
+            MOTOR_SetSpeed(RIGHT, 0.15);
+        }
+        else if (centre < gage && gauche < gage && droite > gageDroit)
+        {
+            //Serial.println("go full right"); // big change turn left
+            MOTOR_SetSpeed(LEFT, 0.15);
+            MOTOR_SetSpeed(RIGHT, 0.05);
+        }
+        else if (centre > gage && gauche > gage && droite > gageDroit)
+        {
+            delay(500);
             break;
         }
-
-        MOTOR_SetSpeed(LEFT, 0);
-        MOTOR_SetSpeed(RIGHT, 0.2);
-
-        derniereDirectionEnregistree = 0;
-
-        if (lectureInitiale == 1)
-        {
-            while (analogRead(IRCentrePin) < 600)
-            {
-                delay(50);
-            }
-        }
-        else
-        {
-            while (analogRead(IRCentrePin) > 600)
-            {
-                delay(50);
-            }
-        }
     }
-    /*
-        int lecture = 1000;
-        lecture = analogRead(IRInterieurPin);
-        
-            int lecture1, lecture2;
-            lecture =  analogRead(IRInterieurPin);
-            delay (50);
-            lecture1 =  analogRead(IRExterieurPin);
-            delay (50);
-            lecture2 =  analogRead(IRDevantPin);
-            delay (50);
-             
-            Serial.print("lecture :");
-            Serial.println(lecture );
-            Serial.print("lecture1 : ");
-            lecture1= lecture1*1.5;
-            Serial.println(lecture1 );
-            Serial.print("lecture2 : ");
-            Serial.println(lecture2 );
-            delay (2000);
-    
-    delay(100);
-    MOTOR_SetSpeed(LEFT, 0.);
-    MOTOR_SetSpeed(RIGHT, 0.);
-    delay(1000);*/
+    Serial.println("INTERSECTION");
 }
 
 JEU GetPositionBalles(int difficulte)
@@ -266,29 +153,43 @@ JEU GetPositionBalles(int difficulte)
     int nbrAleatoire;
     JEU balles;
 
-    int facile[6][2][2] = {{{1, 1}, {0, 0}},
-                           {{1, 1}, {0, 2}},
-                           {{3, 1}, {4, 0}},
-                           {{3, 1}, {4, 2}},
-                           {{1, 1}, {4, 0}},
-                           {{3, 1}, {0, 2}}};
+    int facile[11][2][2] = {{{2, 1}, {3, 2}}, //3-6
+                            {{2, 2}, {3, 1}}, //4-5
+                            {{2, 1}, {2, 2}}, //3-4
+                            {{2, 2}, {2, 1}}, //4-3
+                            //{{3, 2}, {1, 2}},  //3-1
+                            //{{2, 2}, {1, 1}},  //4-1
+                            {{1, 1}, {3, 1}}, //1-5
+                            {{3, 1}, {1, 1}}, //5-1
+                            //{{2, 1}, {1, 2}},  //3-2
+                            {{2, 2}, {1, 2}},  //4-2
+                            {{1, 2}, {3, 2}},  //2-6
+                            {{3, 2}, {1, 2}},  //6-2
+                            {{2, 1}, {3, 1}},  //3-5
+                            {{2, 2}, {3, 2}}}; //4-6
 
-    int moyen[4][2][2] = {{{1, 1}, {2, 0}},
-                          {{3, 1}, {2, 2}},
-                          {{3, 2}, {4, 1}},
-                          {{1, 0}, {0, 1}}};
+    int moyen[4][2][2] = {/*{{1, 1}, {3, 2}},*/ //1-6
+                          //{{1, 2}, {3, 1}},  //2-5
+                          //{{3, 2}, {1, 1}},  //6-1
+                          //{{3, 1}, {1, 2}},  //5-2
+                          {{1, 2}, {2, 2}},  //2-4
+                          {{1, 1}, {2, 1}},  //1-3
+                          {{3, 1}, {2, 1}},  //5-3
+                          {{3, 2}, {2, 2}}}; //6-4
 
-    int difficile[4][2][2] = {{{0, 1}, {3, 1}},
-                              {{0, 1}, {4, 1}},
-                              {{4, 1}, {0, 1}},
-                              {{3, 1}, {1, 1}}};
+    int difficile[4][2][2] = {/*{{1, 1}, {1, 2}},*/ //1-2
+                              {{3, 1}, {3, 2}},     //5-6
+                              /*{{1, 2}, {1, 1}},*/ //2-1
+                              {{3, 2}, {3, 1}},     //6-5
+                              //{{1, 1}, {2, 2}},     //1-4
+                              //{{1, 2}, {2, 1}},     //2-3
+                              {{3, 1}, {2, 2}},  //5-4
+                              {{3, 2}, {2, 1}}}; //6-3
 
-    difficulte = 1;
     if (difficulte == 0)
     {
-        nbrAleatoire = rand() % 6;
+        nbrAleatoire = rand() % 14;
         Serial.println(nbrAleatoire);
-        nbrAleatoire = 2;
         balles.blancheX = facile[nbrAleatoire][0][0];
         balles.blancheY = facile[nbrAleatoire][0][1];
         balles.couleurX = facile[nbrAleatoire][1][0];
@@ -297,8 +198,8 @@ JEU GetPositionBalles(int difficulte)
     }
     else if (difficulte == 1)
     {
-        nbrAleatoire = rand() % 4;
-        nbrAleatoire = 1;
+        nbrAleatoire = rand() % 8;
+        Serial.println(nbrAleatoire);
         balles.blancheX = moyen[nbrAleatoire][0][0];
         balles.blancheY = moyen[nbrAleatoire][0][1];
         balles.couleurX = moyen[nbrAleatoire][1][0];
@@ -307,8 +208,8 @@ JEU GetPositionBalles(int difficulte)
     }
     else
     {
-        nbrAleatoire = rand() % 4;
-        nbrAleatoire = 2;
+        nbrAleatoire = rand() % 6;
+        Serial.println(nbrAleatoire);
         balles.blancheX = difficile[nbrAleatoire][0][0];
         balles.blancheY = difficile[nbrAleatoire][0][1];
         balles.couleurX = difficile[nbrAleatoire][1][0];
@@ -327,25 +228,31 @@ void RejoindreLigne()
     int gauche = 0;
     int droite = 0;
 
-    while (centre < 300 && gauche < 300 && droite < 300)
+    while (true)
     {
         centre = analogRead(IRCentrePin);
         gauche = analogRead(IRGauchePin);
         droite = analogRead(IRDroitePin);
+
+        if (centre < 500 && gauche < 350 && droite < 350)
+        {
+            break;
+        }
     }
 }
 
-void CalculerPositionX(int positionX, int orientation)
+void CalculerPositionX()
 {
     Serial.println("Fonction CalculerPositionX :");
     if (orientation == 1)
     {
-        positionX = positionX + 1;
+        positionX++;
     }
     else if (orientation == 3)
     {
-        positionX = positionX - 1;
+        positionX--;
     }
+    Serial.println(positionX);
 }
 
 void CalculerPositionY()
@@ -353,45 +260,114 @@ void CalculerPositionY()
     Serial.println("Fonction CalculerPositionY :");
     if (orientation == 0)
     {
-        positionY = positionY + 1;
+        positionY--;
     }
     else if (orientation == 2)
     {
-        positionY = positionY - 1;
+        positionY++;
     }
 }
 
-void TournerDroite()
+void TournerDroite90()
 {
-    Serial.println("Fonction TournerDroite :");
-    MOTOR_SetSpeed(RIGHT, -0.1);
-    MOTOR_SetSpeed(LEFT, 0.3);
-    delay(1000);
-    int hasALine = 0;
-    while (hasALine < 400)
-    {
-        hasALine = analogRead(IRGauchePin) * 1.5;
-    }
+    int comptePulse = 0;
+    ENCODER_Reset(LEFT);
+    ENCODER_Reset(RIGHT);
+
+    MOTOR_SetSpeed(RIGHT, -0.2);
+    MOTOR_SetSpeed(LEFT, 0.2);
+
+    delay(1000); //Environ 90 degrés
+
     MOTOR_SetSpeed(LEFT, 0);
     MOTOR_SetSpeed(RIGHT, 0);
+
+    delay(1000);
+
     orientation = (orientation + 1) % 4;
+    Serial.println(orientation);
 }
 
-void TournerGauche()
+void TournerGauche90()
 {
-    Serial.println("Fonction TournerGauche :");
-    MOTOR_SetSpeed(RIGHT, 0.3);
-    MOTOR_SetSpeed(LEFT, -0.1);
-    delay(1000);
-    int hasALine = 0;
-    while (hasALine < 400)
-    {
-        hasALine = analogRead(IRDroitePin) * 1.5;
-        Serial.println(hasALine);
-    }
-    MOTOR_SetSpeed(RIGHT, 0);
+    ENCODER_Reset(LEFT);
+    ENCODER_Reset(RIGHT);
+
+    MOTOR_SetSpeed(RIGHT, 0.2);
+    MOTOR_SetSpeed(LEFT, -0.2);
+
+    delay(1000); //Environ 90 degrés
+
     MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
+
+    delay(1000);
+
     orientation = (orientation - 1) % 4;
+
+    if (orientation == -1)
+    {
+        orientation = 3;
+    }
+    Serial.println(orientation);
+}
+
+void TournerDroite180()
+{
+    MOTOR_SetSpeed(RIGHT, 0.2);
+    MOTOR_SetSpeed(LEFT, -0.2);
+
+    delay(2200); //Environ 90 degrés
+
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
+
+    if (orientation == 1)
+    {
+        orientation = 3;
+    }
+    else if (orientation == 0)
+    {
+        orientation = 2;
+    }
+    else if (orientation == 2)
+    {
+        orientation = 0;
+    }
+    else if (orientation == 3)
+    {
+        orientation = 1;
+    }
+    Serial.println(orientation);
+}
+
+void TournerGauche180()
+{
+    MOTOR_SetSpeed(RIGHT, -0.2);
+    MOTOR_SetSpeed(LEFT, 0.2);
+
+    delay(2200); //Environ 90 degrés
+
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
+
+    if (orientation == 1)
+    {
+        orientation = 3;
+    }
+    else if (orientation == 0)
+    {
+        orientation = 2;
+    }
+    else if (orientation == 2)
+    {
+        orientation = 0;
+    }
+    else if (orientation == 3)
+    {
+        orientation = 1;
+    }
+    Serial.println(orientation);
 }
 
 void positionnerBalle(int balleX, int balleY)
@@ -401,7 +377,8 @@ void positionnerBalle(int balleX, int balleY)
     while (positionX != balleX)
     {
         Suivre_la_ligne();
-        CalculerPositionX(positionX, orientation);
+        CalculerPositionX();
+
         Serial.print("BalleX :");
         Serial.println(balleX);
         Serial.print("positionX :");
@@ -416,22 +393,22 @@ void positionnerBalle(int balleX, int balleY)
     {
         if (orientation == 1)
         {
-            TournerGauche();
+            TournerDroite90();
         }
         if (orientation == 3)
         {
-            TournerDroite();
+            TournerGauche90();
         }
     }
     else if (positionY > balleY)
     {
         if (orientation == 1)
         {
-            TournerDroite();
+            TournerGauche90();
         }
         if (orientation == 3)
         {
-            TournerGauche();
+            TournerDroite90();
         }
     }
     //Ce while faite avancer jusqu'à la ligne en question
@@ -446,32 +423,91 @@ void positionnerBalle(int balleX, int balleY)
     }
 }
 
-void retourRobot(int positionX, int positionY, int orientation)
+void retourRobot()
 {
-    while (positionY != 0)
+    Serial.println("Nice");
+    while (positionX > 1)
     {
+        if (positionX <= 1)
+        {
+            break;
+        }
         Suivre_la_ligne();
-        CalculerPositionY();
+        CalculerPositionX();
+    }
+    Serial.println("Bonjour");
+
+    if (positionY == 1)
+    {
+        TournerGauche90();
+        Suivre_la_ligne();
+        TournerDroite90();
+        Suivre_la_ligne();
+    }
+    else if (positionY == 2)
+    {
+        TournerDroite90();
+        Suivre_la_ligne();
+        TournerGauche90();
+        Suivre_la_ligne();
     }
 
-    if (positionX == 1)
+    else if (positionY == 1 && orientation == 0)
     {
-        TournerGauche();
+        TournerDroite180();
         Suivre_la_ligne();
-        TournerDroite();
-    }
-    if (positionX == 2)
-    {
-        TournerDroite();
+        TournerDroite90();
         Suivre_la_ligne();
-        TournerDroite();
     }
 
-    MOTOR_SetSpeed(LEFT, 0);
+    else if (positionY == 2 && orientation == 2)
+    {
+        TournerDroite180();
+        Suivre_la_ligne();
+        TournerDroite90();
+        Suivre_la_ligne();
+    }
     MOTOR_SetSpeed(RIGHT, 0);
+    MOTOR_SetSpeed(LEFT, 0);
 
-    //Code pour retourner dans son enclos
-    //ici
+    delay(5000);
+
+    Serial.println("180 degrés");
+    TournerGauche180();
+}
+
+void commandeLED(int difficulte , int mode)
+{
+
+    Serial.print( difficulte);
+    Serial.print(" ");
+    Serial.println(mode);
+
+    digitalWrite(PINLEDMODE , mode);
+    if(difficulte == 0)
+    {
+        digitalWrite(PINFACILE , 1);
+        digitalWrite(PINMOYEN , 1);
+        digitalWrite(PINDURE , 1);
+    }
+    else if(difficulte == 1)
+    {
+        digitalWrite(PINFACILE , 1);
+        digitalWrite(PINMOYEN , 0);
+        digitalWrite(PINDURE , 0);
+    }
+    else if(difficulte == 2)
+    {
+        digitalWrite(PINFACILE , 0);
+        digitalWrite(PINMOYEN , 1);
+        digitalWrite(PINDURE , 0);
+    }
+    else if(difficulte == 3)
+    {
+        digitalWrite(PINFACILE , 0);
+        digitalWrite(PINMOYEN , 0);
+        digitalWrite(PINDURE , 1);
+    }
 }
 
 void LancerPartie(int difficultee)
@@ -491,14 +527,17 @@ void LancerPartie(int difficultee)
     Serial.println(balles.couleurX);
     Serial.println(balles.couleurY);
 
-    RejoindreLigne();
+    commandeLED(difficultee + 1, 1);
+
+    Suivre_la_ligne(); //Changera pour suivre la ligne
     positionX++;
 
-    TournerGauche();
+    TournerGauche90();
 
-    RejoindreLigne();
+    Suivre_la_ligne();
+    positionY++;
 
-    TournerDroite();
+    TournerDroite90();
 
     delay(3000);
 
@@ -510,68 +549,105 @@ void LancerPartie(int difficultee)
         {
             if (orientation == 2)
             {
-                TournerDroite();
+                TournerDroite90();
             }
-            else
+            else if (orientation == 1)
             {
-                while (orientation != 3)
-                {
-                    TournerGauche();
-                }
+                TournerDroite180();
             }
         }
-        delay(1000);
-        //MoveServoMoteur(servoMoteurGauche, 90);
-        delay(1000);
-    }
+        //Faire code pour lever le servoMoteur
+        SERVO_SetAngle(servoMoteurDroit, 120);
 
-    positionnerBalle(balles.couleurX, balles.couleurY);
+        positionnerBalle(balles.couleurX, balles.couleurY);
 
-    if (orientation == 0)
-    {
-        TournerGauche();
-    }
-    if (orientation == 2)
-    {
-        TournerDroite();
-    }
-
-    /*if (balles.blancheY > balles.couleurY)
-    {
-        TournerGauche();
-    }
-    else
-    {
-        TournerDroite();
-        if (balles.couleurY == balles.blancheY)
+        if (orientation == 0)
         {
-            TournerDroite();
+            TournerGauche90();
         }
+        else if (orientation == 2)
+        {
+            TournerDroite90();
+        }
+        //Faire code pour lever le servoMoteur
+        SERVO_SetAngle(servoMoteurGauche, 60);
     }
-    MoveServoMoteur(servoMoteurDroit, 90);
-    delay(2000);
+    else if (balles.blancheX < balles.couleurX)
+    {
+        positionnerBalle(balles.couleurX, balles.couleurY);
 
-    if (balles.blancheX > balles.couleurX)
+        if (balles.blancheX < positionX)
+        {
+            if (orientation == 2)
+            {
+                TournerDroite90();
+            }
+            else if (orientation == 1)
+            {
+                TournerDroite180();
+            }
+        }
+        //Faire code pour lever le servoMoteur
+        SERVO_SetAngle(servoMoteurDroit, 120);
+
+        delay(3000);
+        positionnerBalle(balles.blancheX, balles.blancheY);
+
+        if (orientation == 0)
+        {
+            TournerGauche90();
+        }
+        else if (orientation == 2)
+        {
+            TournerDroite90();
+        }
+        //Faire code pour lever le servoMoteur
+        //MoveServoMoteur(servoMoteurGauche, 90);
+        SERVO_SetAngle(servoMoteurGauche, 60);
+    }
+    else if (balles.blancheY < balles.couleurY)
     {
         positionnerBalle(balles.blancheX, balles.blancheY);
-        if (balles.couleurY < balles.blancheY)
-        {
-            TournerGauche();
-        }
-        else
-        {
-            TournerDroite();
-            if (balles.couleurY == balles.blancheY)
-            {
-                TournerDroite();
-            }
-        }
 
-        MoveServoMoteur(servoMoteurGauche, 90);
-        delay(2000);
-    }*/
+        TournerDroite90();
+        //Faire code pour lever le servoMoteur
+        //MoveServoMoteur(servoMoteurGauche, 90);
+        SERVO_SetAngle(servoMoteurDroit, 120);
 
-    retourRobot(positionX, positionY, orientation);
+        positionnerBalle(balles.couleurX, balles.couleurY);
+
+        if (orientation == 0)
+        {
+            TournerGauche90();
+        }
+        else if (orientation == 2)
+        {
+            TournerDroite90();
+        }
+        SERVO_SetAngle(servoMoteurGauche, 60);
+    }
+    else if (balles.blancheY > balles.couleurY)
+    {
+        positionnerBalle(balles.couleurX, balles.couleurY);
+
+        TournerDroite90();
+        //Faire code pour lever le servoMoteur
+        SERVO_SetAngle(servoMoteurDroit, 120);
+
+        positionnerBalle(balles.blancheX, balles.blancheY);
+
+        if (orientation == 0)
+        {
+            TournerGauche90();
+        }
+        else if (orientation == 2)
+        {
+            TournerDroite90();
+        }
+        SERVO_SetAngle(servoMoteurGauche, 60);
+    }
+
+    retourRobot();
 }
 
 bool buttonPress(int analogButtonInput)
@@ -592,43 +668,12 @@ bool buttonPress(int analogButtonInput)
     return false;
 }
 
-void LEDSTRIP_Level(int level)
-{
-    int color;
-
-    if (level == 0)
-        color = CRGB::Blue;
-    if (level == 1)
-        color = CRGB::Yellow;
-    if (level == 2)
-        color = CRGB::Pink;
-
-    memset(leds, 0, NUM_LEDS * 3);
-    for (int i = 0; i < 60; i++)
-    {
-
-        //leds[i-1] = CRGB::Black;
-        leds[i] = color;
-
-        FastLED.show();
-        delay(10);
-    }
-
-    for (int i = BRIGHTNESS; i >= 0; i--)
-    {
-        FastLED.setBrightness(i);
-        FastLED.show();
-        delay(10);
-    }
-
-    FastLED.setBrightness(BRIGHTNESS);
-}
-
 int choixDifficulte()
 {
     int start = 0;
     int difficulte = 0;
 
+    commandeLED(0,0);
     while (!start)
     {
         start = buttonPress(inputButtonStart);
@@ -638,11 +683,12 @@ int choixDifficulte()
         if (buttonDifficulteTrigger)
         {
             difficulte++;
-            Serial.println(difficulte % 3);
-            LEDSTRIP_Level(difficulte % 3);
+            commandeLED((difficulte % 3) + 1, 0);
         }
     }
-    return difficulte;
+    
+    commandeLED((difficulte % 3) + 1, 1);
+    return difficulte % 3;
 }
 
 void InitialisationCapteurDeLigne()
@@ -652,7 +698,7 @@ void InitialisationCapteurDeLigne()
     valeurMaxCentre = 0;
 
     while (valeurMaxDroit < 150 && valeurMaxGauche < 150 && valeurMaxCentre < 150)
-    {      
+    {
         valeurMaxDroit = analogRead(IRDroitePin) * 0.8;
         valeurMaxGauche = analogRead(IRGauchePin) * 0.8;
         valeurMaxCentre = analogRead(IRCentrePin) * 0.8;
@@ -680,6 +726,12 @@ void setup()
     pinMode(13, INPUT);
     pinMode(14, INPUT);
     pinMode(15, INPUT);
+
+    pinMode(PINDURE ,OUTPUT);
+    pinMode(PINMOYEN ,OUTPUT);
+    pinMode(PINFACILE ,OUTPUT);
+    pinMode(PINLEDMODE ,OUTPUT);
+
     Serial.begin(9600);
 
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
@@ -695,43 +747,28 @@ Fonctions de boucle infini (nloop())
 
 void loop()
 {
-    //InitialisationCapteurDeLigne();
+    /*
+    delay(5000);
 
-    Serial.println("Centre : ");
-    Serial.println(valeurMaxCentre);
-    Serial.println("Gauche : ");
-    Serial.println(valeurMaxGauche);
+    SERVO_SetAngle(servoMoteurDroit, 120);
+    SERVO_SetAngle(servoMoteurGauche, 60);
+
+    delay(5000);*/
+
+    int difficulte = choixDifficulte();
+
+    SERVO_SetAngle(servoMoteurDroit, 20);
+    SERVO_SetAngle(servoMoteurGauche, 150);
+
+    //InitialisationCapteurDeLigne();
     Serial.println("Droite : ");
-    Serial.println(valeurMaxDroit);
+    Serial.println(analogRead(IRDroitePin));
+    Serial.println("Gauche : ");
+    Serial.println(analogRead(IRGauchePin));
+    Serial.println("Centre : ");
+    Serial.println(analogRead(IRCentrePin));
+
     delay(2000);
 
-    LancerPartie(0);
-    //Suivre_la_ligne();
-
-    //MOTOR_SetSpeed(RIGHT, 0.2);
-    //MOTOR_SetSpeed(LEFT, 0.21);
-    //delay(20000);
-    /*int lecture11 = analogRead(11);
-    int lecture12 = analogRead(12);
-    int lecture13 = analogRead(13);
-    int lecture14 = analogRead(14);
-    int lecture15 = analogRead(15);
-
-    Serial.print("lecture11 :");
-    Serial.println(lecture11);
-    Serial.print("lecture12 : ");
-    Serial.println(lecture12);
-    Serial.print("lecture13 : ");
-    Serial.println(lecture13);
-    Serial.print("lecture14 : ");
-    Serial.println(lecture14);
-    Serial.print("lecture15 : ");
-    Serial.println(lecture15);
-    delay(2000);*/
-
-    //Attend le choix de difficulté de l'utilisateur
-    //int difficulte = choixDifficulte() % 3;
-
-    //int gauche = analogRead(IRGauchePin);
-    //Serial.println(gauche);
+    LancerPartie(difficulte);
 }
