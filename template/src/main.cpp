@@ -88,16 +88,16 @@ void Suivre_la_ligne()
 
     while (true)
     {
-        int pressStop = analogRead(inputButtonStart);
+        //int pressStop = analogRead(inputButtonStart);
 
-        if (pressStop >= 1000)
+        /*if (pressStop >= 1000)
         {
             while (true)
             {
                 MOTOR_SetSpeed(RIGHT, 0);
                 MOTOR_SetSpeed(LEFT, 0);
             }
-        }
+        }*/
 
         centre = analogRead(IRCentrePin);
         gauche = analogRead(IRGauchePin);
@@ -141,7 +141,7 @@ void Suivre_la_ligne()
         }
         else if (centre > gage && gauche > gage && droite > gageDroit)
         {
-            delay(500);
+            delay(600);
             break;
         }
     }
@@ -268,7 +268,7 @@ void CalculerPositionY()
     }
 }
 
-void TournerDroite90()
+void TournerDroite90s()
 {
     int comptePulse = 0;
     ENCODER_Reset(LEFT);
@@ -289,6 +289,71 @@ void TournerDroite90()
 }
 
 void TournerGauche90()
+{
+    int comptePulse = 0;
+
+    ENCODER_Reset(RIGHT);
+    ENCODER_Reset(LEFT);
+
+    MOTOR_SetSpeed(RIGHT, 0.2);
+    MOTOR_SetSpeed(LEFT, -0.23);
+
+    //delay(1000);
+
+    while (true)
+    {
+        comptePulse = ENCODER_Read(RIGHT);
+        Serial.println(comptePulse);
+        delay(10);
+
+        if(comptePulse > (0.53 * 3200))
+        {
+            break;
+        }
+    }
+
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
+    delay(1000);
+
+    orientation = (orientation - 1) % 4;
+    if (orientation == -1)
+    {
+        orientation = 3;
+    }
+    Serial.println(orientation);
+}
+
+void TournerDroite90()
+{
+    int comptePulse = 0;
+
+    ENCODER_Reset(RIGHT);
+    ENCODER_Reset(LEFT);
+
+    MOTOR_SetSpeed(RIGHT, -0.23);
+    MOTOR_SetSpeed(LEFT, 0.2);
+    //delay(1000);
+
+    while (true)
+    {
+        comptePulse = ENCODER_Read(LEFT);
+        Serial.println(comptePulse);
+        delay(10);
+        if(comptePulse > (0.55 * 3200))
+        {
+            break;
+        }
+    }
+
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
+    delay(1000);
+    orientation = (orientation + 1) % 4;
+    Serial.println(orientation);
+}
+
+void TournerGauche90s()
 {
     ENCODER_Reset(LEFT);
     ENCODER_Reset(RIGHT);
@@ -314,10 +379,32 @@ void TournerGauche90()
 
 void TournerDroite180()
 {
-    MOTOR_SetSpeed(RIGHT, 0.2);
+    /*MOTOR_SetSpeed(RIGHT, 0.2);
     MOTOR_SetSpeed(LEFT, -0.2);
 
     delay(2200); //Environ 90 degrés
+
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);*/
+
+    int comptePulse = 0;
+
+    ENCODER_Reset(RIGHT);
+    ENCODER_Reset(LEFT);
+
+    MOTOR_SetSpeed(RIGHT, -0.2);
+    MOTOR_SetSpeed(LEFT, 0.2);
+
+     while (true)
+    {
+        comptePulse = ENCODER_Read(LEFT);
+        Serial.println(comptePulse);
+        delay(10);
+        if(comptePulse > (1.20 * 3200))
+        {
+            break;
+        }
+    }
 
     MOTOR_SetSpeed(LEFT, 0);
     MOTOR_SetSpeed(RIGHT, 0);
@@ -343,13 +430,38 @@ void TournerDroite180()
 
 void TournerGauche180()
 {
-    MOTOR_SetSpeed(RIGHT, -0.2);
+    /*MOTOR_SetSpeed(RIGHT, -0.2);
     MOTOR_SetSpeed(LEFT, 0.2);
 
     delay(2200); //Environ 90 degrés
 
     MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);*/
+
+    int comptePulse = 0;
+
+    ENCODER_Reset(RIGHT);
+    ENCODER_Reset(LEFT);
+
+    MOTOR_SetSpeed(RIGHT, 0.2);
+    MOTOR_SetSpeed(LEFT, -0.2);
+    delay(1000);
+
+    while (true)
+    {
+        comptePulse = ENCODER_Read(RIGHT);
+        Serial.println(comptePulse);
+        delay(10);
+
+        if(comptePulse > (1.18 * 3200))
+        {
+            break;
+        }
+    }
+
+    MOTOR_SetSpeed(LEFT, 0);
     MOTOR_SetSpeed(RIGHT, 0);
+    delay(1000);
 
     if (orientation == 1)
     {
