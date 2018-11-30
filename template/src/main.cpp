@@ -141,6 +141,8 @@ void Suivre_la_ligne()
         }
         else if (centre > gage && gauche > gage && droite > gageDroit)
         {
+            MOTOR_SetSpeed(RIGHT, speedDroite);
+            MOTOR_SetSpeed(LEFT, speedGauche);
             delay(600);
             break;
         }
@@ -400,7 +402,7 @@ void TournerDroite180()
         comptePulse = ENCODER_Read(LEFT);
         Serial.println(comptePulse);
         delay(10);
-        if(comptePulse > (1.20 * 3200))
+        if(comptePulse > (1.30 * 3200))
         {
             break;
         }
@@ -651,7 +653,7 @@ void LancerPartie(int difficultee)
 
     TournerDroite90();
 
-    delay(3000);
+    delay(1000);
 
     if (balles.blancheX > balles.couleurX)
     {
@@ -681,8 +683,13 @@ void LancerPartie(int difficultee)
         {
             TournerDroite90();
         }
+        MOTOR_SetSpeed(RIGHT, 0);
+        MOTOR_SetSpeed(LEFT, 0);
+
         //Faire code pour lever le servoMoteur
+        delay(500);
         SERVO_SetAngle(servoMoteurGauche, 60);
+        delay(500);
     }
     else if (balles.blancheX < balles.couleurX)
     {
@@ -699,8 +706,12 @@ void LancerPartie(int difficultee)
                 TournerDroite180();
             }
         }
+        MOTOR_SetSpeed(RIGHT, 0);
+        MOTOR_SetSpeed(LEFT, 0);
         //Faire code pour lever le servoMoteur
+        delay(500);
         SERVO_SetAngle(servoMoteurDroit, 120);
+        delay(500);
 
         delay(3000);
         positionnerBalle(balles.blancheX, balles.blancheY);
@@ -713,9 +724,13 @@ void LancerPartie(int difficultee)
         {
             TournerDroite90();
         }
+        MOTOR_SetSpeed(RIGHT, 0);
+        MOTOR_SetSpeed(LEFT, 0);
         //Faire code pour lever le servoMoteur
         //MoveServoMoteur(servoMoteurGauche, 90);
+        delay(500);
         SERVO_SetAngle(servoMoteurGauche, 60);
+        delay(500);
     }
     else if (balles.blancheY < balles.couleurY)
     {
@@ -724,7 +739,9 @@ void LancerPartie(int difficultee)
         TournerDroite90();
         //Faire code pour lever le servoMoteur
         //MoveServoMoteur(servoMoteurGauche, 90);
+        delay(500);
         SERVO_SetAngle(servoMoteurDroit, 120);
+        delay(500);
 
         positionnerBalle(balles.couleurX, balles.couleurY);
 
@@ -736,7 +753,11 @@ void LancerPartie(int difficultee)
         {
             TournerDroite90();
         }
+        MOTOR_SetSpeed(RIGHT, 0);
+        MOTOR_SetSpeed(LEFT, 0);
+        delay(500);
         SERVO_SetAngle(servoMoteurGauche, 60);
+        delay(500);
     }
     else if (balles.blancheY > balles.couleurY)
     {
@@ -744,7 +765,9 @@ void LancerPartie(int difficultee)
 
         TournerDroite90();
         //Faire code pour lever le servoMoteur
+        delay(500);
         SERVO_SetAngle(servoMoteurDroit, 120);
+        delay(500);
 
         positionnerBalle(balles.blancheX, balles.blancheY);
 
@@ -756,7 +779,9 @@ void LancerPartie(int difficultee)
         {
             TournerDroite90();
         }
+        delay(500);
         SERVO_SetAngle(servoMoteurGauche, 60);
+        delay(500);
     }
 
     retourRobot();
@@ -866,6 +891,7 @@ void loop()
     SERVO_SetAngle(servoMoteurGauche, 60);
 
     delay(5000);*/
+    Serial.println("Bonjour");
 
     int difficulte = choixDifficulte();
 
